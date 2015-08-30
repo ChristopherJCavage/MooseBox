@@ -1,0 +1,16 @@
+{
+    "DefaultTTY": "/dev/ttyUSB0",
+
+    "DigiTempConfigPath": "/etc/digitemp.conf",
+
+    "Redis":
+    {
+        "Hostname": "127.0.0.1",
+        "Port": 6379,
+
+        "PubSub":
+        {
+            "Sensor0": "PubSub.Channels.Temperature.CurrentReading"
+        }
+    }
+}
