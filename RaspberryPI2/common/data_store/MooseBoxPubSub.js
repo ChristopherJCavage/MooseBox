@@ -49,7 +49,7 @@ function MooseBoxPubSub(hostname, port) {
     this.m_redisPubSubS.on('connect', this.onRedisConnected.bind(this));
     this.m_redisPubSubS.on('error', this.onRedisError.bind(this));
     this.m_redisPubSubS.on('message', this.onRedisMessagePublished.bind(this));
-};
+}
 
                                 /******************/
                                 /*** PUBLIC API ***/
@@ -77,6 +77,7 @@ MooseBoxPubSub.prototype.publishFanCtrlReq = function(fanNumber, powerOn, timest
     var obj = {};
 
     obj.PowerOn = powerOn;
+    obj.FanNumber = fanNumber;
     obj.Timestamp = timestamp;
 
     //Publish it.
