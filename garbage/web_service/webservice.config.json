@@ -1,0 +1,12 @@
+{
+    "Redis":
+    {
+        "Hostname": "MooseBox",
+        "Port": 6379,
+
+        "PubSub":
+        {
+            "Sensor0": "PubSub.Channels.Temperature.CurrentReading"
+        }
+    }
+}
