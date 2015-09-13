@@ -1,0 +1,7 @@
+{
+    "LinkUSBTTYs": [
+        "/dev/ttyUSB0"
+    ],
+
+    "DigiTempConfigPath": "/etc/digitemp.conf"
+}

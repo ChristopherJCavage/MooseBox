@@ -14,15 +14,14 @@
  * You should have received a copy of the GNU General Public License    *
  * along with this program; if not, see <http://www.gnu.org/licenses/>. *
  ************************************************************************/
-var redis = require('redis');
 
 /**
  * Defines an abstraction for default RedisDB connection constants.
  */
 function MooseBoxRedisDefaults() {
     //Public Constants.
-    this.DEFAULT_HOSTNAME = redis.default_host;
-    this.DEFAULT_PORT = redis.default_port;
+    this.DEFAULT_HOSTNAME = '127.0.0.1';
+    this.DEFAULT_PORT = 6379;
 }
 
 //Export this class outside this file.

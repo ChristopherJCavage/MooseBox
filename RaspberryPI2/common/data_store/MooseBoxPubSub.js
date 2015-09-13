@@ -247,18 +247,14 @@ MooseBoxPubSub.prototype.subscribeTemperatureSensorSerialNumbers = function(call
 /**
  * Redis DB handler routine for connection event.
  */
-MooseBoxPubSub.prototype.onRedisConnected = function() {
-    console.log('MooseBox Redis PubSub Connected.');
-}
+MooseBoxPubSub.prototype.onRedisConnected = function() { /* no-op */ }
 
 /**
  * Redis DB handler routine for error event.
  *
  * @param err Error object.
  */
-MooseBoxPubSub.prototype.onRedisError = function(err) {
-    console.log('MooseBox Redis PubSub Error. Err: ' + err);
-}
+MooseBoxPubSub.prototype.onRedisError = function(err) { /* no-op */ }
 
 /**
  * Redis DB handler routine for Publish-Subscribe channel data.
@@ -268,18 +264,18 @@ MooseBoxPubSub.prototype.onRedisError = function(err) {
  */
 MooseBoxPubSub.prototype.onRedisMessagePublished = function(channel, message) {
     //Every message in our system is in JSON; parse it unilaterally.
-    if (null === message || 0 == message.length)
+    if (!message || 0 === message.length)
         return;
 
     var jsonRoot = JSON.parse(message);
 
     //Now, attempt to lookup the channel in our handlers callback map; if applicable...
-    if (null === jsonRoot)
+    if (!jsonRoot)
         return;
 
     var handler = this.m_lookupHandlers[channel];
 
-    if (null !== handler)
+    if (handler)
         handler(jsonRoot); //Invoke Handler.
 }
 

@@ -16,6 +16,10 @@
  ************************************************************************/
 var exec = require('child_process').exec;
 
+                                /******************/
+                                /*** PUBLIC API ***/
+                                /******************/
+
 /**
  * Defines an abstraction for a YepKit YKUSH programmatically powerable USB switch.  Device connects
  * to the Raspberry PI 2 via USB/MicroUSB with a 3rd party Linux command as the CONTROL interface.
@@ -25,22 +29,13 @@ var exec = require('child_process').exec;
  * @see https://www.yepkit.com/products/ykush
  * @see https://www.yepkit.com/uploads/documents/09c6d_YKUSH_ProductManual_v1.1.1.pdf
  */
-function YepKitYKUSH(initPower, powerOn) {
+function YepKitYKUSH() {
     //Public Constants.
     this.MIN_PORT_NUMBER = 1;
     this.MAX_PORT_NUMBER = 3;
 
     //Set Members.
     this.m_powerStateLookup = new Object();
-
-    //Set everything to the unpowered state.
-    if (true === initPower)
-        for(i = this.MIN_PORT_NUMBER; i <= this.MAX_PORT_NUMBER; i++)
-            this.setPower(i, powerOn, function(err, reply) {
-                //Abort for any initialization error; we cannot construct in zombie state.
-                if (err)
-                    throw 'Cannot initialize YepKit YKUSH. Err: ' + err;
-            });
 }
 
 /**
@@ -61,6 +56,8 @@ YepKitYKUSH.prototype.getPower = function(port) {
 /**
  * Sets the current power state (i.e. on/off) of a YKUSH USB port.
  *
+ * Both asynchronous and synchronous variants are provided.
+ *
  * @param port YepKit YKUSH USB Port Number; must be 1 <= Port <= 3.
  * @param powerOn true to power the USB port; false to unpower.
  * @param callback Optional callback of type function(err, stateObj) to 
@@ -72,6 +69,23 @@ YepKitYKUSH.prototype.getPower = function(port) {
  * @see http://askubuntu.com/questions/72267/how-to-allow-execution-without-using-the-sudo
  */ 
 YepKitYKUSH.prototype.setPower = function(port, powerOn, callback) {
+    return this._setPowerWorker(port, powerOn, true, callback);
+}
+
+YepKitYKUSH.prototype.setPowerSync = function(port, powerOn) {
+    return this._setPowerWorker(port, powerOn, false, null);
+}
+
+                                /*****************************/
+                                /*** PRIVATE API (Workers) ***/
+                                /*****************************/
+
+/**
+ * @see https://nodejs.org/api/child_process.html#child_process_child_process_execsync_command_options
+ */
+YepKitYKUSH.prototype._setPowerWorker = function(port, powerOn, isAsync, callback) {
+    var result = true;
+
     //Parameter Validations.
     if (port < this.MIN_PORT_NUMBER || port > this.MAX_PORT_NUMBER)
         throw 'Invalid port.  Must be ' + this.MIN_PORT_NUMBER + ' <= P <= ' + this.MAX_PORT_NUMBER;
@@ -83,28 +97,46 @@ YepKitYKUSH.prototype.setPower = function(port, powerOn, callback) {
     cmd += ' ' + port;
 
     //Asynchronously invoke on the command-line.
-    exec(cmd, function(error, stdout, stderr) {
-    {
-        var err = null;
-        var obj = {};
+    if (true === isAsync)
+        exec(cmd, function(error, stdout, stderr) {
+            var err = null;
+            var obj = {};
 
-        if (error || stderr) //Combine errors.
-            err = "error: " + error + ", stderr: " + stderr;
-        else
-        {
+            if (error || stderr) //Combine errors.
+                err = "error: " + error + ", stderr: " + stderr;
+            else
+            {
+                //Update the cached value upon success.
+                this.m_powerStateLookup[port] = powerOn;
+
+                //Generate a timestamped state object.
+                obj.Port = port;
+                obj.PowerOn = powerOn;
+                obj.Timestamp = Date.now();
+            }
+
+            //Invoke completion callback (Optional).
+            if (callback)
+                callback(null, obj);
+        }.bind(this));
+    else //Synchronously invoke on the command-line.
+    {
+        //From node 0.12 documentation:
+        //   "If the process times out, or has a non-zero exit code, this method will throw.
+        //    The Error object will contain the entire result from child_process.spawnSync"
+        try {
+            //Synchronously invoke; not throwing assumes success.
+            execSync(cmd);
+
             //Update the cached value upon success.
             this.m_powerStateLookup[port] = powerOn;
-
-            //Generate a timestamped state object.
-            obj.Port = port;
-            obj.PowerOn = powerOn;
-            obj.Timestamp = Date.now();
         }
+        catch(err) {
+            result = false;
+        }
+    }
 
-        //Invoke completion callback (Optional).
-        if (callback)
-            callback(null, obj);
-    }.bind(this));
+    return result;
 }
 
 //Export this class outside this file.

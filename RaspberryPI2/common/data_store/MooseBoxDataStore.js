@@ -28,19 +28,22 @@ var redis = require('redis');
  * @remarks Publish-Subscribe oerations are not included.
  */
 function MooseBoxDataStore(hostname, port) {
+    //Parameter Validations.
+    if (!hostname || 0 === hostname.length)
+        throw 'hostname cannot be null or empty';
+
+    if (!port)
+        throw 'port cannot be 0 (reserved) or null';
+
     //Create one shared instance for Redis DB key lookup / building.
     this.m_mbrKeys = new MooseBoxRedisKeys();
 
     //Create Redis DB client for all non Pub/Sub operations.
     this.m_redisC = new redis.createClient(port, hostname);
 
-    this.m_redisC.on('connect', function() {
-        console.log('MooseBox DataStore Redis DB client connected.');
-    });
+    this.m_redisC.on('connect', function() { /* no-op */ });
 
-    this.m_redisC.on('error', function(err) {
-        console.log('MooseBox DataStore Redis DB error. Error: ' + err);
-    });
+    this.m_redisC.on('error', function(err) { /* no-op */ });
 };
 
                                 /******************/
@@ -62,7 +65,7 @@ MooseBoxDataStore.prototype.addTemperatureReading = function(serialNumber, celsi
     var CURRENT_VALUE_TIMEOUT_S = 25;
 
     //Parameter Validations.
-    if (!serialNumber || 0 == serialNumber.length)
+    if (!serialNumber || 0 === serialNumber.length)
         throw 'serialNumber cannot be null / empty';
 
     if (!celsius || !timestamp || !addHistorical) //callback is optional.
@@ -87,7 +90,7 @@ MooseBoxDataStore.prototype.addTemperatureReading = function(serialNumber, celsi
 
                 //If we are also adding to the historical readings, do so now.  We give them the option
                 //because on the Raspberry PI 2 we don't have oodles of memory so they might rate-limit.
-                if (!err && reply === 1 && addHistorical === true)
+                if (!err && 1 === reply && true === addHistorical)
                 {
                     //Build the historical reading key.
                     var histReadingKey = this.m_mbrKeys.getTemperatureHistoricalReadingKey(serialNumber);
@@ -105,7 +108,7 @@ MooseBoxDataStore.prototype.addTemperatureReading = function(serialNumber, celsi
                 }
 
                 //Report status to user if this is the last async call.
-                if (raiseCallback === true && callback)
+                if (true === raiseCallback && callback)
                     callback(err, reply);
             }.bind(this));
         }
@@ -162,7 +165,7 @@ MooseBoxDataStore.prototype.addFanCtrlReading = function(fanNumber, powerOn, tim
  */
 MooseBoxDataStore.prototype.queryCurrentTemperature = function(serialNumber, callback) {
     //Parameter Validations.
-    if (!serialNumber || 0 == serialNumber.length)
+    if (!serialNumber || 0 === serialNumber.length)
         throw 'serialNumber cannot be null / empty';
 
     //Build the key for the query.
@@ -187,7 +190,7 @@ MooseBoxDataStore.prototype.queryCurrentTemperature = function(serialNumber, cal
  */
 MooseBoxDataStore.prototype.queryHistoricalTemperatures = function(serialNumber, startTimestamp, endTimestamp, callback) {
     //Parameter Validations.
-    if (!serialNumber || 0 == serialNumber.length)
+    if (!serialNumber || 0 === serialNumber.length)
         throw 'serialNumber cannot be null / empty';
 
     if (!startTimestamp || !endTimestamp || !callback)
@@ -222,7 +225,7 @@ MooseBoxDataStore.prototype.queryHistoricalTemperatures = function(serialNumber,
  */
 MooseBoxDataStore.prototype.getFirstLastTemperatureTimestamps = function(serialNumber, callback) {
     //Parameter Validations.
-    if (!serialNumber || 0 == serialNumber.length)
+    if (!serialNumber || 0 === serialNumber.length)
         throw 'serialNumber cannot be null / empty';
 
     //Build the key for the query.
