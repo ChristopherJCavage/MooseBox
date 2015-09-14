@@ -23,7 +23,8 @@ Besides the Raspberry PI 2, the main hardware components include:
 - iButtonLink T-Probe Temperature Sensors: http://www.ibuttonlink.com/pages/temperature-sensors
 - iButtonLink USB/RJ-45 Adapters: http://www.ibuttonlink.com/products/linkusb
 - YepKit YKUSH programmable USB switches: https://www.yepkit.com/products/ykush
-- USB Fans, which you can find of various sizes on amazon.com
+- USB WiFi Dongle recommended by Adafruit: http://www.adafruit.com/products/814
+- USB Fans, which you can find of various sizes on https://www.amazon.com
 
 As of 2015-Sep-13, I have the following implemented:
 - Temperature data acquisition and logging
@@ -32,3 +33,9 @@ As of 2015-Sep-13, I have the following implemented:
 - Temperature Alarms
 
 I am currently working on writing the REST API.  Upon completion of the web service, all that remains on the physical MooseBox are some scripts to init everything on launch and some misc Linux administration tasks.  Post that, I will begin on the iPhone client!
+
+Following are some pictures to showing the MooseBox during different phases:
+
+20150901: Early development w/splayed out hardware and a couple fans and a temperature sensor.
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBox_HardwareSplayOut_A.png)
+
