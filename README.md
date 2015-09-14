@@ -4,11 +4,11 @@ Welcome to MooseBox!
 MooseBox is a Raspberry PI 2 based platform for regulating cold air using programmable fans and temperature sensors.  The end result is to put pure science behind the process of making homemade soppressata and wine.  It is a joint project between myself (Chris Cavage) and my father (Joseph Cavage).  I am writing all of the software and administrating the Raspberry PI 2 setup while my father is going to do the measurements, wood-working and duct-work for bringing in cold air during the winter months at our Northeast Pennsylvania homestead.
 
 The MooseBox will, or plans to, support all of the following features:
-1. Independent automation of N programmable fans based on temperature.
-2. Support for 1...M Temperature Sensors.
-3. K subscribers to M Temperature Sensors for email notifications for Temperature Alarms based on an end-user's chosen min/max thresholds.
-4. Accumulation of time-series data for each sensor; aiming to store upwards to 4 months of data for each temperature sensor.
-5. Provide an iPhone client application with the ability to plot live and historical data, configure temperature alarms, and monitor the power state of fans.
+- Independent automation of N programmable fans based on temperature.
+- Support for 1...M Temperature Sensors.
+- K subscribers to M Temperature Sensors for email notifications for Temperature Alarms based on an end-user's chosen min/max thresholds.
+- Accumulation of time-series data for each sensor; aiming to store upwards to 4 months of data for each temperature sensor.
+- Provide an iPhone client application with the ability to plot live and historical data, configure temperature alarms, and monitor the power state of fans.
 
 I am an extremely passionate, professional Software Engineer who mainly specializes in writing with the C, C++ and C# languages - with enough Python knowledge to be dangerous (e.g. build scripts, etc).  MooseBox allows me to have some real fun on a side project and learn a language I don't use in my day-2-day grind:  JavaScript via node.js. Even though I'm no JavaScript expert, I am trying to write this project "as if" I was writing a professional software project so I'm hoping to have it clean, well commented and easy to understand.  Shoot me an email (cjcavage@gmail.com) if you feel otherwise; I really do try to make everything right!
 
@@ -19,10 +19,10 @@ MooseBox is about having fun and curing some delicious charcuteries for eating!!
 A MooseBox with two temperature sensors and three fans costs about $240 by the time all the parts are acquired.  Having written a plethora of code for various $5 microcontrollers using I2C sensors before, I realize I could have made better decisions to keep costs lower.  However, doing so would require me to really have an electrical engineer handy and at the time of this writing I was/am a remote employee and do not have such contacts close-by to help!
 
 Besides the Raspberry PI 2, the main hardware components include:
-1. iButtonLink T-Probe Temperature Sensors: http://www.ibuttonlink.com/pages/temperature-sensors
-2. iButtonLink USB/RJ-45 Adapters: http://www.ibuttonlink.com/products/linkusb
-3. YepKit YKUSH programmable USB switches: https://www.yepkit.com/products/ykush
-4. USB Fans, which you can find of various sizes on amazon.com
+- iButtonLink T-Probe Temperature Sensors: http://www.ibuttonlink.com/pages/temperature-sensors
+- iButtonLink USB/RJ-45 Adapters: http://www.ibuttonlink.com/products/linkusb
+- YepKit YKUSH programmable USB switches: https://www.yepkit.com/products/ykush
+- USB Fans, which you can find of various sizes on amazon.com
 
 As of 2015-Sep-13, I have the following implemented:
 - Temperature data acquisition and logging
