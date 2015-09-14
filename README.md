@@ -19,10 +19,10 @@ MooseBox is about having fun and curing some delicious charcuteries for eating!!
 A MooseBox with two temperature sensors and three fans costs about $240 by the time all the parts are acquired.  Having written a plethora of code for various $5 microcontrollers using I2C sensors before, I realize I could have made better decisions to keep costs lower.  However, doing so would require me to really have an electrical engineer handy and at the time of this writing I was/am a remote employee and do not have such contacts close-by to help!
 
 Besides the Raspberry PI 2, the main hardware components include:
-> iButtonLink T-Probe Temperature Sensors: http://www.ibuttonlink.com/pages/temperature-sensors
-> iButtonLink USB/RJ-45 Adapters: http://www.ibuttonlink.com/products/linkusb
-> YepKit YKUSH programmable USB switches: https://www.yepkit.com/products/ykush
-> USB Fans, which you can find of various sizes on amazon.com
+1. iButtonLink T-Probe Temperature Sensors: http://www.ibuttonlink.com/pages/temperature-sensors
+2. iButtonLink USB/RJ-45 Adapters: http://www.ibuttonlink.com/products/linkusb
+3. YepKit YKUSH programmable USB switches: https://www.yepkit.com/products/ykush
+4. USB Fans, which you can find of various sizes on amazon.com
 
 As of 2015-Sep-13, I have the following implemented:
 - Temperature data acquisition and logging
