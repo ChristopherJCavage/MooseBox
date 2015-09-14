@@ -1,4 +1,4 @@
-# MooseBox
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/moose_md.png) # MooseBox
 Welcome to MooseBox!
 
 MooseBox is a Raspberry PI 2 based platform for regulating cold air using programmable fans and temperature sensors.  The end result is to put pure science behind the process of making homemade soppressata and wine.  It is a joint project between myself (Chris Cavage) and my father (Joseph Cavage).  I am writing all of the software and administrating the Raspberry PI 2 setup while my father is going to do the measurements, wood-working and duct-work for bringing in cold air during the winter months at our Northeast Pennsylvania homestead.
