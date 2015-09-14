@@ -161,7 +161,7 @@ function displayHelp() {
     console.log('  -d Run as a daemon. Intended to be ran with \'Forever\' and RedisDB Pub/Sub.');
     console.log('  -h Display help information.');
     console.log('  -i Optional IP address / hostname of the MooseBox RedisDB instance.');
-    console.log('  -p Optional port number of the MooseBox RedisDB instance.')
+    console.log('  -p Optional port number of the MooseBox RedisDB instance.');
     console.log('  -x Powers/Unpowers YepKit YKUSH USB port. Use with -y');
     console.log('  -y YepKit YKUSH USB port number to control. Use with -x');
     console.log('  -z Report version information.');

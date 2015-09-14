@@ -44,7 +44,7 @@ function MooseBoxPubSub(hostname, port) {
 
     this.m_redisPubSubP.on('connect', this.onRedisConnected.bind(this));
     this.m_redisPubSubP.on('error', this.onRedisError.bind(this));
-    this.m_redisPubSubP.on('message', this.onRedisMessagePublished.bind(this));
+    //this.m_redisPubSubP.on('message', this.onRedisMessagePublished.bind(this));
 
     this.m_redisPubSubS.on('connect', this.onRedisConnected.bind(this));
     this.m_redisPubSubS.on('error', this.onRedisError.bind(this));
@@ -62,8 +62,7 @@ function MooseBoxPubSub(hostname, port) {
  * @param powerOn true if the numbered fan was powered; false otherwise.
  * @param timestamp Timestamp the fan control operation was sourced at.
  */
-MooseBoxPubSub.prototype.publishFanCtrlReq = function(fanNumber, powerOn, timestamp)
-{
+MooseBoxPubSub.prototype.publishFanCtrlReq = function(fanNumber, powerOn, timestamp) {
     var mbrKeys = new MooseBoxRedisKeys();
 
     //Parameter Validations.
@@ -111,6 +110,7 @@ MooseBoxPubSub.prototype.publishTemperatureReadingNotify = function(serialNumber
     var obj = {};
 
     obj.Celsius = celsius;
+    obj.SerialNumber = serialNumber;
     obj.Timestamp = timestamp;
 
     //Publish it.
@@ -254,7 +254,7 @@ MooseBoxPubSub.prototype.onRedisConnected = function() { /* no-op */ }
  *
  * @param err Error object.
  */
-MooseBoxPubSub.prototype.onRedisError = function(err) { /* no-op */ }
+MooseBoxPubSub.prototype.onRedisError = function(err) { console.log('RedisDB Pub/Sub Error. Err: ' + err); }
 
 /**
  * Redis DB handler routine for Publish-Subscribe channel data.

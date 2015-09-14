@@ -43,7 +43,7 @@ function MooseBoxDataStore(hostname, port) {
 
     this.m_redisC.on('connect', function() { /* no-op */ });
 
-    this.m_redisC.on('error', function(err) { /* no-op */ });
+    this.m_redisC.on('error', function(err) { console.log('RedisDB DataStore Error. Err: ' + err); });
 };
 
                                 /******************/
