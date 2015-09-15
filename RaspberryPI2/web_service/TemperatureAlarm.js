@@ -23,6 +23,7 @@
  * @param rateLimitMs Rate-limiting timeout to avoid email spamming since temperature
  *                    readings are polled at 1.1Hz.  0 disables rate-limiting.
  * @param alarmsConfigObj Initial subscriber information (i.e. JSON from RedisDB).
+ * @remarks Rate-limiting map is not serialized or deserialized; it in-memory only.
  */
 function TemperatureAlarm(rateLimitMs, alarmsConfigObj) {
     //Parameter Validations.
@@ -48,7 +49,7 @@ function TemperatureAlarm(rateLimitMs, alarmsConfigObj) {
     //Ultimately, we're going to end up with a JSON object that more or less looks like this:
     //
     //  {
-    //      "RegisteredSerialNumbers": [
+    //      "RegisteredAlarms": [
     //          {
     //              "SerialNumber": 1234,
     //              "Subscribers": [
@@ -68,9 +69,9 @@ function TemperatureAlarm(rateLimitMs, alarmsConfigObj) {
     //
     //Convert it to registered alarms for the base case by iterating.  We'll index it by the serial
     //number for quick look up and then it'll just be an O(n) operation where N = Number of subscribers.
-    if (alarmsConfigObj && 0 !== alarmsConfigObj.RegisteredSerialNumbers.length)
-        for(i = 0; i < alarmsConfigObj.RegisteredSerialNumbers.length; i++)
-            this.m_registeredAlarms[alarmsConfigObj.RegisteredAlarms.SerialNumber] = alarmsConfigObj.RegisteredSerialNumbers[i].Subscribers;
+    if (alarmsConfigObj && 0 !== alarmsConfigObj.RegisteredAlarms.length)
+        for(i = 0; i < alarmsConfigObj.RegisteredAlarms.length; i++)
+            this.m_registeredAlarms[alarmsConfigObj.RegisteredAlarms[i].SerialNumber] = alarmsConfigObj.RegisteredAlarms[i].Subscribers;
 }
 
 /**
@@ -133,83 +134,66 @@ TemperatureAlarm.prototype.register = function(serialNumber, celsiusMin, celsius
 }
 
 /**
- * Unregisters a subscriber from Temperature Alarming for a specific T-Probe temperature sensor.
+ * Unregisters all email addresses associated with a sensor and removes that sensor from registration entirely.
  *
- * @param serialNumber iButtonLink T-Probe sensor associated with the temperature alarm.
- * @param emailAddress Subscriber's email address.
- * @return true if the subscriber was unregistered; false otherwise.
- * @remarks O(k); where k = number of current subscribers for T-Probe sensor serial number.
+ * @param serialNumber iButtonLink T-Probe serial number to unregister.
+ * @return List of all email addresses that were consequently unregistered.
  */
-TemperatureAlarm.prototype.unregister = function(serialNumber, emailAddress) {
+TemperatureAlarm.prototype.unregisterSensor = function(serialNumber) {
+    var unregisteredEmailAddresses = [];
+
     //Parameter Validations.
-    if (undefined === serialNumber || null === serialNumber)
+    if (null === serialNumber || undefined === serialNumber)
         throw 'serialNumber cannot be null';
 
-    //First, see if the T-Probe sensors was registered anywhere; if so, then do a scan
-    //on the subscriber list to see the caller's email address exists or not.
-    var index = -1;
+    //Easier, just find the serial number and create a shallow copy and remove them.
+    if (serialNumber in this.m_registeredAlarms && this.m_registeredAlarms.hasOwnProperty(serialNumber))
+    {
+        //Create a new copy (shallow) of the addresses so we can return them.
+        unregisteredEmailAddresses = this.m_registeredAlarms[serialNumber].slice();
+    
+        //Now, delete this entire entry from our registration object.  Note that, these
+        //email addresses may be registered to other sensors (so no chain-calling).
+        delete this.m_registeredAlarms[serialNumber];
+    }
 
-    for(i = 0; i < this.m_registeredAlarms[serialNumber].length; i++)
-        if (this.m_registeredAlarms[serialNumber][i].EmailAddress === emailAddress)
-        {
-            index = i;
-
-            break;
-        }
-
-    //Did we find it?  In-place removal of just this one element.
-    if (-1 !== index)
-        this.m_registeredAlarms[serialNumber].splice(index, 1);
-
-    //Return status for devel-purposes.
-    return (-1 !== index);
+    return unregisteredEmailAddresses;
 }
 
 /**
- * Creates an object ready for JSON stringification containing a snapshot of all the
- * subscribers currently subscribed to all the iButtonLink T-Probe sensors.
+ * Unregisters an email address associated with a single, or all, iButtonLink T-Probe Sensor(s)
  *
- * @return Object containing all subscriber info; can be passed in this class's constructor.
- * @remarks O(n + m); where N = the total number T-Probe sensors and M = total number of subscribers (ALL).
+ * @param emailAddress Subscriber's email address to unregister.
+ * @param serialNumber Optional iButtonLink T-Probe serial number to unregister from.
+ * @remarks O(N + M); where N = number of sensors and M = number of email addresses.
  */
-TemperatureAlarm.prototype.getAlarmsConfig = function() {
-    //As stated in the constructor, we're doing something like this:
-    //  {
-    //      "RegisteredSerialNumbers": [
-    //          {
-    //              "SerialNumber": 1234,
-    //              "Subscribers": [
-    //                  {
-    //                      "EmailAddress": "cjcavage@gmail.com",
-    //                      "CelsiusMin": 30,
-    //                      "CelsiusMax": 50
-    //                  },
-    //
-    //                  //...et cetera
-    //              ]
-    //          }
-    //
-    //          //...et cetera
-    //      ]
-    //  }
-    var alarmsConfig = new Object();
+TemperatureAlarm.prototype.unregisterEmailAddress = function(emailAddress, serialNumber) {
+    //Parameter Validations.
+    if (!emailAddress || 0 === emailAddress.length)
+        throw 'emailAddress cannot be null/empty';
 
-    alarmsConfig.RegisteredSerialNumbers = [];
-
-    //Iterate over all of our objects; which themselves contain lists.
-    for (var serialNumber in this.m_registeredAlarms)
-        if (this.m_registeredAlarms.hasOwnProperty(serialNumber))
+    //Email addresses can be registered to multiple sensors; scan each in turn and remove it.
+    //Long compound conditional is to only unregister an email address with a specific sensor
+    //if a serial number was provided; otherwise, just do a blind unregister with all of them.
+    //Also note that because the keys were stringified, we shall stringify our serial number.
+    for (var property in this.m_registeredAlarms)
+        if (this.m_registeredAlarms.hasOwnProperty(property) && 
+            (null === serialNumber || undefined === serialNumber || property === String(serialNumber)))
         {
-            var registeredSerialNumber = {};
+            //Linear scan the list for the email address.
+            for(i = 0; i < this.m_registeredAlarms[property].length; i++)
+                if (emailAddress === this.m_registeredAlarms[property][i].EmailAddress)
+                {
+                    //Each sensor has a list of unique email address; so just remove it and plow on.
+                    this.m_registeredAlarms[property].splice(i, 1);
 
-            registeredSerialNumber.SerialNumber = serialNumber;
+                    break;
+                }
 
-            registeredSerialNumber.Subscribers = this.m_registeredAlarms[serialNumber];
-
-            alarmsConfig.RegisteredSerialNumbers.push(registeredSerialNumber);
+            //Now, in the event that was the last element, and it was removed, wipe out the entry too.
+            if (0 === this.m_registeredAlarms[property].length)
+                delete this.m_registeredAlarms[property];
         }
-
-    return alarmsConfig;
 }
 
 /**
@@ -266,6 +250,69 @@ TemperatureAlarm.prototype.checkReading = function(serialNumber, celsius) {
 
     //Return the list of emails who's thresholds have resulted in an alarm.
     return result;
+}
+
+/**
+ * Queries all email addresses that are currently registered with the instance.
+ *
+ * @param serialNumber Optional iButtonLink T-Probe serial number to restrict query to.
+ * @return List of registered email addresses.
+ * @remarks O(N)
+ */
+TemperatureAlarm.prototype.getRegisteredEmailAddresses = function(serialNumber) {
+    //Return all the keys as a list; however, since the same email address
+    //can be registered to multiple sensors we're going to put all the emails
+    //into the typical JavaScript object first to ensure uniqueness; then get keys.
+    //Also note that, the keys are saved as keys so do that to ours too.
+    var registeredEmailAddresses = new Object();
+
+    for (var property in this.m_registeredAlarms)
+        if (this.m_registeredAlarms.hasOwnProperty(property) && 
+            (null === serialNumber || undefined === serialNumber || property === String(serialNumber)))
+            for (i = 0; i < this.m_registeredAlarms[property].length; i++)
+                registeredEmailAddresses[this.m_registeredAlarms[property][i].EmailAddress] = true;
+
+    return Object.keys(registeredEmailAddresses);
+}
+
+/**
+ * Queries all T-Probe sensor serial numbers that are currently registered with the instance.
+ *
+ * @return List of registered T-Probe sensor serial numbers.
+ * @remarks O(N)
+ */
+TemperatureAlarm.prototype.getRegisteredTemperatureSensors = function() {
+    //Return all the keys as a list.
+    return Object.keys(this.m_registeredAlarms);
+}
+
+/**
+ * Creates an object ready for JSON stringification containing a snapshot of all the
+ * subscribers currently subscribed to all the iButtonLink T-Probe sensors.
+ *
+ * @return Object containing all subscriber info; can be passed in this class's constructor.
+ * @remarks O(n + m); where N = the total number T-Probe sensors and M = total number of subscribers (ALL).
+ */
+TemperatureAlarm.prototype.getAlarmsConfig = function() {
+    //See comments in constructor for example formatting.
+    var alarmsConfig = new Object();
+
+    alarmsConfig.RegisteredAlarms = [];
+
+    //Iterate over all of our objects; which themselves contain lists.
+    for (var serialNumber in this.m_registeredAlarms)
+        if (this.m_registeredAlarms.hasOwnProperty(serialNumber))
+        {
+            var registeredAlarm = {};
+
+            registeredAlarm.SerialNumber = serialNumber;
+
+            registeredAlarm.Subscribers = this.m_registeredAlarms[serialNumber];
+
+            alarmsConfig.RegisteredAlarms.push(registeredAlarm);
+        }
+
+    return alarmsConfig;
 }
 
 //Export this class outside this file.

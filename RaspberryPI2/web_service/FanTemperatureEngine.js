@@ -187,7 +187,7 @@ FanTemperatureEngine.prototype.unregisterSensor = function(serialNumber) {
         throw 'serialNumber cannot be null';
 
     //Unlike a fan unregistration, unregistering by serial number takes down all the fans.
-    if (serialNumber in this.m_registeredSensors)
+    if (serialNumber in this.m_registeredSensors && this.m_registeredSensors.hasOwnProperty(serialNumber))
     {
         //Create a new copy (shallow) of the fans so we can return them.
         unregisteredFans = this.m_registeredSensors[serialNumber].slice();
@@ -246,7 +246,6 @@ FanTemperatureEngine.prototype.getPowerStateInstructions = function(serialNumber
 /**
  * Queries all numbered USB fans that are currently registered with the instance.
  *
- * @param serialNumber iButtonLink T-Probe Sensor Serial Number.
  * @return List of registered fans.
  * @remarks O(N)
  */
