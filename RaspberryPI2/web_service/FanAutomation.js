@@ -23,7 +23,7 @@
  *
  * @param fanConfigObj Initial state and pairing information (i.e. JSON from RedisDB).
  */
-function FanTemperatureEngine(configObj) {
+function FanAutomation(configObj) {
     //Set members.
     this.m_registeredSensors = new Object();
     this.m_registeredFansSet = new Object();
@@ -85,7 +85,7 @@ function FanTemperatureEngine(configObj) {
  * @remkars Unlike Temperature Alarms, an UPDATE operation is not performed if fan is already registered.
  * @remarks O(1)
  */
-FanTemperatureEngine.prototype.register = function(serialNumber, fanNumber, powerOnThresholdCelsius) {
+FanAutomation.prototype.register = function(serialNumber, fanNumber, powerOnThresholdCelsius) {
     //Parameter Validations.
     if (null === serialNumber || undefined === serialNumber)
         throw 'serialNumber cannot be null';
@@ -132,7 +132,7 @@ FanTemperatureEngine.prototype.register = function(serialNumber, fanNumber, powe
  * @param fanNumber USB Fan to unregister (YKUSH USB Port).
  * @remarks O(M); where M = number fans registered to a T-Probe Sensor Serial Number.
  */
-FanTemperatureEngine.prototype.unregisterFan = function(fanNumber) {
+FanAutomation.prototype.unregisterFan = function(fanNumber) {
     //Parameter Validations.
     if (null === fanNumber || undefined === fanNumber)
         throw 'fanNumber cannot be null';
@@ -179,7 +179,7 @@ FanTemperatureEngine.prototype.unregisterFan = function(fanNumber) {
  * @return List of fans that were consequently unregistered.
  * @remarks O(M); where M = number of unregistered fans.
  */ 
-FanTemperatureEngine.prototype.unregisterSensor = function(serialNumber) {
+FanAutomation.prototype.unregisterSensor = function(serialNumber) {
     var unregisteredFans = [];
 
     //Parameter Validations.
@@ -209,7 +209,7 @@ FanTemperatureEngine.prototype.unregisterSensor = function(serialNumber) {
  * @return 0...N length list of numbered USB fan power state instructions.
  * @remarks O(M); where M = number of registered fans to a temperature sensor.
  */
-FanTemperatureEngine.prototype.getPowerStateInstructions = function(serialNumber, celsius) {
+FanAutomation.prototype.getPowerStateInstructions = function(serialNumber, celsius) {
     var fanPowerCtrlList = [];
 
     //Parameter Validations.
@@ -249,7 +249,7 @@ FanTemperatureEngine.prototype.getPowerStateInstructions = function(serialNumber
  * @return List of registered fans.
  * @remarks O(N)
  */
-FanTemperatureEngine.prototype.getRegisteredFans = function() {
+FanAutomation.prototype.getRegisteredFans = function() {
     //Return all the keys as a list.
     return Object.keys(this.m_registeredFansSet);
 }
@@ -260,7 +260,7 @@ FanTemperatureEngine.prototype.getRegisteredFans = function() {
  * @return List of registered T-Probe sensor serial numbers.
  * @remarks O(N)
  */
-FanTemperatureEngine.prototype.getRegisteredTemperatureSensors = function() {
+FanAutomation.prototype.getRegisteredTemperatureSensors = function() {
     //Return all the keys as a list.
     return Object.keys(this.m_registeredSensors);
 }
@@ -270,7 +270,7 @@ FanTemperatureEngine.prototype.getRegisteredTemperatureSensors = function() {
  *
  * @return JSON ready config object.
  */
-FanTemperatureEngine.prototype.getConfigObj = function() {
+FanAutomation.prototype.getConfigObj = function() {
     var configObj = new Object();
 
     //Convert the useable registered sensors-fans into the more descriptive JSON version.
@@ -291,4 +291,4 @@ FanTemperatureEngine.prototype.getConfigObj = function() {
 }
 
 //Export this class outside this file.
-module.exports = FanTemperatureEngine;
+module.exports = FanAutomation;
