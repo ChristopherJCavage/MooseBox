@@ -36,6 +36,8 @@ I am currently working on writing the REST API.  Upon completion of the web serv
 
 Following are some pictures to showing the MooseBox during different phases:
 
-20150901: Early development w/splayed out hardware and a couple fans and a temperature sensor.
+**20150901:** Early development w/splayed out hardware and a couple fans and a temperature sensor.
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBox_HardwareSplayOut_A.png)
 
+**20150915:** Devs-Eye-View of the whole Pub/Sub working with Fan Automation:
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/PubSub_DevelView.png)
