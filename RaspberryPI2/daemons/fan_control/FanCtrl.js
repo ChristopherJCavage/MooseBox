@@ -23,7 +23,7 @@ var argv = require('minimist')(process.argv.slice(2));
 var dateFormat = require('dateformat');
 
 //Constants
-var MOOSE_BOX_FAN_CTRL_DAEMON_VERSION = '0.0.2';
+var MOOSE_BOX_FAN_CTRL_DAEMON_VERSION = '0.0.3';
 
 /**
  * Main entry point for MooseBox Fan Control Daemon.
@@ -121,6 +121,7 @@ function automaticPowerUSBPort(hostname, port) {
     //then start monitoring the Pub/Sub for requests for fan control switches.
     for(i = yepKitYKUSH.MIN_PORT_NUMBER; i < yepKitYKUSH.MAX_PORT_NUMBER; i++)
         mooseBoxDataStore.queryCurrentFanCtrl(i, function(err, fanNumber, reply) {
+
             //It's possible this is the first time through (system); we could get null reply & success.
             if (!err && reply)
                 yepKitYKUSH.setPowerSync(fanNumber, reply.PowerOn); 
@@ -128,7 +129,7 @@ function automaticPowerUSBPort(hostname, port) {
             //With the fan state guaranteed in the starting state, now we can subscribe to new 
             //requests for this USB Fan channel number (i.e. no race-conditions).  From hereon
             //it will be asynchronous requests - as it should be! 
-            mooseBoxPubSub.subscribeFanCtrlReq(i, function(obj) {
+            mooseBoxPubSub.subscribeFanCtrlReq(fanNumber, function(obj) {
                 //Pretty-print published data request; which is to say, the new fan power ("this can't fail").
                 var timestampStr = dateFormat('yyyy-mm-dd_hh:MM:ss');
 
@@ -141,8 +142,8 @@ function automaticPowerUSBPort(hostname, port) {
                     if (!err && reply)
                         mooseBoxDataStore.addFanCtrlReading(obj.Port, obj.PowerOn, obj.Timestamp);
                 });
-            }.bind(i));
-        }.bind(i));
+            });
+        });
 
     //That's it, from here the node Redis client keeps us running.
 }
@@ -161,7 +162,7 @@ function displayHelp() {
     console.log('  -d Run as a daemon. Intended to be ran with \'Forever\' and RedisDB Pub/Sub.');
     console.log('  -h Display help information.');
     console.log('  -i Optional IP address / hostname of the MooseBox RedisDB instance.');
-    console.log('  -p Optional port number of the MooseBox RedisDB instance.');
+    console.log('  -p Optional port number of the MooseBox RedisDB instance.')
     console.log('  -x Powers/Unpowers YepKit YKUSH USB port. Use with -y');
     console.log('  -y YepKit YKUSH USB port number to control. Use with -x');
     console.log('  -z Report version information.');

@@ -234,14 +234,14 @@ function displayHelp() {
     console.log('Responsible for monitoring 0...N iButtonLink T-Probe temperature sensors');
     console.log('connected to 0...N iButtonLink LinkUSB devices.  Temperature data is both');
     console.log('pretty-printed to the console and reported to the MooseBox RedisDB Pub/Sub.');
-    console.log('Single-shot temperature queries may also be performed by the SDE(T).');
+    console.log('Single-shot temperature queries may also be performed by the SDE(T).')
     console.log();
     console.log('Options:');
     console.log('  -d Run as a daemon. Intended to be ran with \'Forever\' and RedisDB Pub/Sub.');
     console.log('  -f Path to the Temperature Daemon JSON configuration file.');
     console.log('  -h Display help information.');
     console.log('  -i Optional IP address / hostname of the MooseBox RedisDB instance.');
-    console.log('  -p Optional port number of the MooseBox RedisDB instance.');
+    console.log('  -p Optional port number of the MooseBox RedisDB instance.')
     console.log('  -t TTY of LinkUSB device; use one -t for each TTY connected to MooseBox.');
     console.log('  -z Report version information.');
 }

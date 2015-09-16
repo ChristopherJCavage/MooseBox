@@ -18,8 +18,6 @@ var MooseBoxDataStore = require('../common/data_store/MooseBoxDataStore.js');
 var MooseBoxPubSub = require('../common/data_store/MooseBoxPubSub.js');
 var MooseBoxRedisDefaults = require('../common/data_store/MooseBoxRedisDefaults.js');
 
-var dateFormat = require('dateformat');
-
 /**
  * Defines an abstraction for a module of handler methods specific to the RedisDB Pub/Sub.
  * This is the main/top-level of the application, and so we have knowledge of all the 
@@ -27,8 +25,10 @@ var dateFormat = require('dateformat');
  *
  * @param mooseBoxPubSubRef Reference to the MooseBox Pub/Sub.
  * @param mooseBoxDataStoreRef Reference to the MooseBox DataStore.
+ * @param temperatureAlarmRef Reference to the TemperatureAlarm object.
+ * @param fanAutomationRef Reference to the FanAutomation object.
  */
-function MooseBoxPubSubHandlers(mooseBoxPubSubRef, mooseBoxDataStoreRef) {
+function MooseBoxPubSubHandlers(mooseBoxPubSubRef, mooseBoxDataStoreRef, temperatureAlarmRef, fanAutomationRef) {
     //Parameter Validations.
     if (!mooseBoxPubSubRef)
         throw 'mooseBoxPubSubRef cannot be null';
@@ -36,9 +36,17 @@ function MooseBoxPubSubHandlers(mooseBoxPubSubRef, mooseBoxDataStoreRef) {
     if (!mooseBoxDataStoreRef)
         throw 'mooseBoxDataStoreRef cannot be null';
 
+    if (!temperatureAlarmRef)
+        throw 'temperatureAlarmRef cannot be null';
+
+    if (!fanAutomationRef)
+        throw 'fanAutomationRef cannot be null';
+
     //Set Members.
     this.m_mooseBoxPubSubRef = mooseBoxPubSubRef;
     this.m_mooseBoxDataStoreRef = mooseBoxDataStoreRef;
+    this.m_temperatureAlarmRef = temperatureAlarmRef;
+    this.m_fanAutomationRef = fanAutomationRef;
 
     this.m_subscribedTempSerialNumSet = new Object();
 
@@ -61,6 +69,8 @@ function MooseBoxPubSubHandlers(mooseBoxPubSubRef, mooseBoxDataStoreRef) {
  * @param serialNumbers 0...N T-Probe sensor serial numbers.
  */
 MooseBoxPubSubHandlers.prototype.onGetTemperatureSensorSerialNumbers = function(err, serialNumbers) {
+    console.log2('Quried Sensor SNs: ' + JSON.stringify(serialNumbers));
+
     //Possibly subscribe to new temperature sensors (if no error).
     if (!err && serialNumbers)
         this._refreshTemperatureSensorSubscriptionsWorker(serialNumbers);
@@ -72,6 +82,8 @@ MooseBoxPubSubHandlers.prototype.onGetTemperatureSensorSerialNumbers = function(
  * @param serialNumbers 0...N T-Probe sensor serial numbers.
  */
 MooseBoxPubSubHandlers.prototype.onTemperatureSensorSerialNumbersNotify = function(serialNumbers) {
+    console.log('Sensor SNs Published: ' + JSON.stringify(serialNumbers));
+
     //Possibly subscribe to new temperature sensors (if no error).
     if (serialNumbers)
         this._refreshTemperatureSensorSubscriptionsWorker(serialNumbers);
@@ -83,14 +95,39 @@ MooseBoxPubSubHandlers.prototype.onTemperatureSensorSerialNumbersNotify = functi
  * @param readingObj Timestamped reading object contain value in degrees Celsius.
  */
 MooseBoxPubSubHandlers.prototype.onTemperatureReadingNotify = function(readingObj) {
-    //Pretty-print to console for devel-purposes.
-    var timestampStr = dateFormat('yyyy-mm-dd_hh:MM:ss');
+    console.log2('SN: ' + readingObj.SerialNumber + ', ' + readingObj.Celsius + ' C, ' + convertToFahrenheit(readingObj.Celsius) + ' F');
 
-    console.log(timestampStr + ' [' + readingObj.SerialNumber + '] - ' + readingObj.Celsius + ' C, ' + convertToFahrenheit(readingObj.Celsius) + ' F');
+    //For every reading that comes in, from every sensor, check it to see if we should send an email.
+    var emailAddressList = this.m_temperatureAlarmRef.checkReading(readingObj.SerialNumber, readingObj.Celsius);
 
-    //TODO: Temperature Alarms
+    console.log2('Temperature Alarms Checked (Tripped: ' + emailAddressList.length + ')');
 
-    //TODO: Fan Ctrl Temperature Algo
+    //TODO:  Find an email library.
+    for (i = 0; i < emailAddressList.length; i++)
+        ;
+
+    //Again, for every reading from every sensor, ascertain how the 1...N fans need to be powered.
+    var fanPowerCtrlList = this.m_fanAutomationRef.getPowerStateInstructions(readingObj.SerialNumber, readingObj.Celsius);
+
+    console.log2('Fan Automation Instructions (Count: ' + fanPowerCtrlList.length + ')');
+
+    //Now, add this to our historical data and instruct the Fan Ctrl Daemon on power states.
+    for (i = 0; i < fanPowerCtrlList.length; i++)
+    {
+        console.log2(' > FanCtrl. SN: ' + readingObj.SerialNumber + ' Fan: ' + fanPowerCtrlList[i].FanNumber + ', Power: ' + fanPowerCtrlList[i].PowerOn);
+
+        this.m_mooseBoxPubSubRef.publishFanCtrlReq(fanPowerCtrlList[i].FanNumber,
+                                                   fanPowerCtrlList[i].PowerOn,
+                                                   readingObj.Timestamp);
+
+        this.m_mooseBoxDataStoreRef.addFanCtrlReading(fanPowerCtrlList[i].FanNumber,
+                                                      fanPowerCtrlList[i].PowerOn,
+                                                      readingObj.Timestamp,
+                                                      function(err) {
+                                                          if (err)
+                                                              console.log2('Fan Ctrl Data Add Error. Err: ' + err);
+                                                      });
+    }
 }
 
                                 /*****************************/
@@ -110,13 +147,9 @@ MooseBoxPubSubHandlers.prototype._refreshTemperatureSensorSubscriptionsWorker = 
         throw 'serialNumbers cannot be null';
 
     //Go serial # by serial #; if we don't have it in our "Set" already then we need to additionally subscribe.
-    //Also, pretty-print to the console for devel-purposes.
-    var timestampStr = dateFormat('yyyy-mm-dd_hh:MM:ss');
-
     for(i = 0; i < serialNumbers.length; i++)
     {
-        //Pretty-print.
-        console.log(timestampStr + ' - T-Probe Serial Number: ' + serialNumbers[i]);
+        console.log2('T-Probe SN: ' + serialNumbers[i]);
 
         //RedisDB Subscription management.
         if (!(serialNumbers[i] in this.m_subscribedTempSerialNumSet))

@@ -15,6 +15,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>. *
  ************************************************************************/
 var exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
 
                                 /******************/
                                 /*** PUBLIC API ***/

@@ -202,7 +202,7 @@ TemperatureAlarm.prototype.unregisterEmailAddress = function(emailAddress, seria
  *
  * @param serialNumber iButtonLink T-Probe serial number from which the reading was sourced.
  * @param celsius Temperature reading in degrees Celsius.
- * @return Array of email address whose alarms are set (i.e. send them emails).
+ * @return Array of email addresses whose alarms are set (i.e. send them emails).
  * @remarks O(k ); where K = number of subscribers registered for a T-Probe sensor.
  */
 TemperatureAlarm.prototype.checkReading = function(serialNumber, celsius) {
