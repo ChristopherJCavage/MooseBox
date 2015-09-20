@@ -68,7 +68,7 @@ MooseBoxDataStore.prototype.addTemperatureReading = function(serialNumber, celsi
     if (!serialNumber || 0 === serialNumber.length)
         throw 'serialNumber cannot be null / empty';
 
-    if (!celsius || !timestamp || !addHistorical) //callback is optional.
+    if (!celsius || !timestamp || (true !== addHistorical && false !== addHistorical)) //callback is optional.
         throw 'celsius, timestamp, addHistorical, callback cannot be null';
 
     //Always add the temperature to the current reading O(1) slot; build our key.
@@ -303,7 +303,7 @@ MooseBoxDataStore.prototype.queryHistoricalFanCtrl = function(fanNumber, startTi
  * @param callback Callback of type function(err, startTimestamp, endTimestamp) to invoke.
  * @remarks O(log(N) + M)
  */
-MooseBoxDataStore.prototype.getFirstLastTemperatureTimestamps = function(fanNumber, callback) {
+MooseBoxDataStore.prototype.getFirstLastFanCtrlTimestamps = function(fanNumber, callback) {
     //Parameter Validations.
     if (fanNumber < 0)
         throw 'fanNumber cannot be negative';

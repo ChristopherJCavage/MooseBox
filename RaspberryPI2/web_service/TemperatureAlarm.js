@@ -165,9 +165,12 @@ TemperatureAlarm.prototype.unregisterSensor = function(serialNumber) {
  *
  * @param emailAddress Subscriber's email address to unregister.
  * @param serialNumber Optional iButtonLink T-Probe serial number to unregister from.
+ * @return true if an unregistration occurred; false otherwise.
  * @remarks O(N + M); where N = number of sensors and M = number of email addresses.
  */
 TemperatureAlarm.prototype.unregisterEmailAddress = function(emailAddress, serialNumber) {
+    var isChanged = false;
+
     //Parameter Validations.
     if (!emailAddress || 0 === emailAddress.length)
         throw 'emailAddress cannot be null/empty';
@@ -187,13 +190,21 @@ TemperatureAlarm.prototype.unregisterEmailAddress = function(emailAddress, seria
                     //Each sensor has a list of unique email address; so just remove it and plow on.
                     this.m_registeredAlarms[property].splice(i, 1);
 
+                    isChanged = true;
+
                     break;
                 }
 
             //Now, in the event that was the last element, and it was removed, wipe out the entry too.
             if (0 === this.m_registeredAlarms[property].length)
+            {
                 delete this.m_registeredAlarms[property];
+
+                isChanged = true;
+            }
         }
+
+    return isChanged;
 }
 
 /**

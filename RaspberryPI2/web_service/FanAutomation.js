@@ -65,10 +65,10 @@ function FanAutomation(configObj) {
     //Convert the JSON into our (useable) registration object now.
     if (configObj)
         for(i = 0; i < configObj.RegisteredSensors.length; i++)
-            for (j = 0; j < configObj.RegisteredSensors[i].length; j++)
+            for (j = 0; j < configObj.RegisteredSensors[i].FansConfig.length; j++)
                 this.register(configObj.RegisteredSensors[i].SerialNumber,
-                              configObj.RegisteredSensors[i][j].FanNumber,
-                              configObj.RegisteredSensors[i][j].PowerOnThresholdCelsius);
+                              configObj.RegisteredSensors[i].FansConfig[j].FanNumber,
+                              configObj.RegisteredSensors[i].FansConfig[j].PowerOnThresholdCelsius);
 }
 
 /**
@@ -107,7 +107,7 @@ FanAutomation.prototype.register = function(serialNumber, fanNumber, powerOnThre
     //avoid O(N) scanning.
     if (fanNumber in this.m_registeredFansSet)
         if (this.m_registeredFansSet.hasOwnProperty(fanNumber))
-            throw 'fanNumber is m_registeredFansSet registered. Please unregister it first';
+            throw 'fanNumber is already registered. Please unregister it first';
 
     //There are no more oppurtunities for failure; add it as a registered fan in the "Set" now.
     this.m_registeredFansSet[fanNumber] = serialNumber;
@@ -127,12 +127,39 @@ FanAutomation.prototype.register = function(serialNumber, fanNumber, powerOnThre
 }
 
 /**
+ * Determines if a USB Fan is registered for temperature automation.
+ *
+ * @param USB Fan to lookup registration info on.
+ * @return true if registered; false otherwise.
+ */
+FanAutomation.prototype.isRegistered = function(fanNumber) {
+    var isRegistered = false;
+
+    //Parameter Validations.
+    if (null === fanNumber || undefined === fanNumber)
+        throw 'fanNumber cannot be null';
+
+    if (fanNumber < 0)
+        throw 'fanNumber must be >= 0';
+
+    //Lookup registration.
+    if (fanNumber in this.m_registeredFansSet)
+        if (this.m_registeredFansSet.hasOwnProperty(fanNumber))
+            isRegistered = true;
+
+    return isRegistered;
+}
+
+/**
  * Unregisters a fan from the Fan-Temperature Engine algorithm and its associated temperature sensor.
  *
  * @param fanNumber USB Fan to unregister (YKUSH USB Port).
+ * @return true if the fan was unregistered; false otherwise.
  * @remarks O(M); where M = number fans registered to a T-Probe Sensor Serial Number.
  */
 FanAutomation.prototype.unregisterFan = function(fanNumber) {
+    var isChanged = false;
+
     //Parameter Validations.
     if (null === fanNumber || undefined === fanNumber)
         throw 'fanNumber cannot be null';
@@ -159,6 +186,9 @@ FanAutomation.prototype.unregisterFan = function(fanNumber) {
         //We presume this works; if it doesnt', again, just ignore (noexcept).
         if (-1 !== index)
         {
+            //We are modifying the instance, mark it.
+            isChanged = true;
+
             //Remove it from the list first.
             this.m_registeredSensors[serialNumber].splice(index, 1);
 
@@ -170,6 +200,8 @@ FanAutomation.prototype.unregisterFan = function(fanNumber) {
                 delete this.m_registeredSensors[serialNumber];
         }
     }
+
+    return isChanged;
 }
 
 /**

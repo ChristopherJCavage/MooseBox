@@ -168,7 +168,7 @@ function monitorTemperatureSensors(jsonConfigRoot, hostname, port) {
                 //Add the list of serial numbers to the map for this TTY.
                 ttySerialNumbersMap[tty] = serialNumbers
 
-                allSerialNumbers.push(serialNumbers);
+                allSerialNumbers = allSerialNumbers.concat(serialNumbers);
 
                 //To avoid more callback-nesting; just give RedisDB what we have; overwriting
                 //on a SET operation doesn't hurt anything at all.  More importantly, we are
@@ -208,8 +208,8 @@ function monitorTemperatureSensors(jsonConfigRoot, hostname, port) {
                     // *NOTE: Recall that as of 9/12/2015 my father decided to not daisy-chain temperature sensors
                     //        from the LinkUSB device.  Instead, we're having one T-Probe per LinkUSB device. 
                     //        For now, that means we know we just have length:1 arrays.  TBD in the future though.
-                    mooseBoxDataStore.addTemperatureReading(serialNumbers[0], readingObj.Celsius, readingObj.Timestamp, function(err, reply) {
-                        if (!err)
+                    mooseBoxDataStore.addTemperatureReading(serialNumbers[0], readingObj.Celsius, readingObj.Timestamp, true, function(err, reply) {
+                        if (err)
                             console.log('Datastore Error. Err: ' + err);
                     });
 

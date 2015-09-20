@@ -119,7 +119,7 @@ function automaticPowerUSBPort(hostname, port) {
     //
     //Once the RedisDB replies back - SYNCHRONOUSLY - set the fan power
     //then start monitoring the Pub/Sub for requests for fan control switches.
-    for(i = yepKitYKUSH.MIN_PORT_NUMBER; i < yepKitYKUSH.MAX_PORT_NUMBER; i++)
+    for(i = yepKitYKUSH.MIN_PORT_NUMBER; i <= yepKitYKUSH.MAX_PORT_NUMBER; i++)
         mooseBoxDataStore.queryCurrentFanCtrl(i, function(err, fanNumber, reply) {
 
             //It's possible this is the first time through (system); we could get null reply & success.

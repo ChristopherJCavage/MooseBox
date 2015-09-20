@@ -19,6 +19,7 @@ var MooseBoxDataStore = require('../common/data_store/MooseBoxDataStore.js');
 var MooseBoxPubSub = require('../common/data_store/MooseBoxPubSub.js');
 var MooseBoxPubSubHandlers = require('./MooseBoxPubSubHandlers.js');
 var MooseBoxRedisDefaults = require('../common/data_store/MooseBoxRedisDefaults.js');
+var RESTAPIHandlers = require('./RESTAPIHandlers.js');
 var TemperatureAlarm = require('./TemperatureAlarm.js');
 
 var argv = require('minimist')(process.argv.slice(2));
@@ -29,7 +30,7 @@ var dateFormat = require('dateformat');
                                 /**********************/
 
 //Public Constants
-var MOOSE_BOX_WEB_SERVICE_VERSION = '0.0.1';
+var MOOSE_BOX_WEB_SERVICE_VERSION = '0.0.2';
 
 var TEMPERATURE_ALARM_RATE_LIMIT_MS = 1000 * 60 * 15; //15 Minutes
 
@@ -49,6 +50,8 @@ function TheApp() {
     //MooseBox Business Logic.
     this.TheFanAutomationObj = null;
     this.TheTemperatureAlarmObj = null;
+
+    this.TheTemperatureAlarmRateLimit = TEMPERATURE_ALARM_RATE_LIMIT_MS;
 }
 
 /**
@@ -95,6 +98,10 @@ function main(argv) {
 
             console.log2('RedisDB Connection Request @ ' + hostname + ':' + port);
 
+            //Did the user override the default Temperature Alarm rate-limit?
+            if (null !== argv.r && undefined !== argv.r && argv.r >= 0)
+                theApp.TheTemperatureAlarmRateLimit = argv.r;
+
             //MooseBox has Raspbian's initialization sequence to kick off the daemons first, then the web-service:
             //  0. [Implied] RedisDB
             //
@@ -131,9 +138,10 @@ function main(argv) {
  * Displays help information to the console.
  */
 function displayHelp() {
-    console.log('MooseBox Temperature Daemon');
+    console.log('MooseBox Controller');
     console.log('------------------------------------------------------------------------------');
-    console.log('<TODO>')
+    console.log('Master server for MooseBox Fan Automation, Temperature Alarming, and data');
+    console.log('acquisition and storage. Interaction with the service is through a REST API.');
     console.log();
     console.log('Options:');
     console.log('  -d Run as a daemon. Intended to be ran with \'Forever\' and RedisDB Pub/Sub.');
@@ -141,6 +149,7 @@ function displayHelp() {
     console.log('  -h Display help information.');
     console.log('  -i Optional IP address / hostname of the MooseBox RedisDB instance.');
     console.log('  -p Optional port number of the MooseBox RedisDB instance.');
+    console.log('  -r Optional rate limit, in milliseconds, for temperature alarms. 0 disables.')
     console.log('  -z Report version information.');
 }
 
@@ -185,12 +194,11 @@ function onGetTemperatureDaemonVersion(err, versionStr) {
  * @param configObj Queried configuration data, which may be null.
  */
 function onGetFanCtrlConfig(theApp, err, configObj) {
-    console.log2('Fan Automation ConfigObj Response. ');
+    console.log2('Fan Automation ConfigObj Response.');
 
     //Invoke worker logic; only create a new TemperatureAlarm if it doesn't exist.
     _configResWorker(theApp, err, configObj, function(actualConfig) {
-        if (!theApp.TheFanAutomationObj)
-            theApp.TheFanAutomationObj = new FanAutomation(actualConfig);
+        theApp.TheFanAutomationObj = new FanAutomation(actualConfig);
     });
 }
 
@@ -206,8 +214,7 @@ function onGetTemperatureConfig(theApp, err, configObj) {
 
     //Invoke worker logic; only create a new TemperatureAlarm if it doesn't exist.
     _configResWorker(theApp, err, configObj, function(actualConfig) {
-        if (!theApp.TheTemperatureAlarmObj)
-            theApp.TheTemperatureAlarmObj = new TemperatureAlarm(TEMPERATURE_ALARM_RATE_LIMIT_MS, actualConfig);
+        theApp.TheTemperatureAlarmObj = new TemperatureAlarm(theApp.TheTemperatureAlarmRateLimit, actualConfig);
     });
 }
 
@@ -252,6 +259,13 @@ function _configResWorker(theApp, err, configObj, callback) {
                                                               theApp.TheMooseBoxDataStore,
                                                               theApp.TheTemperatureAlarmObj,
                                                               theApp.TheFanAutomationObj);
+
+        console.log2('Starting Express REST API');
+
+        theApp.TheHandlersREST = new RESTAPIHandlers(theApp.TheMooseBoxPubSub,
+                                                     theApp.TheMooseBoxDataStore,
+                                                     theApp.TheFanAutomationObj,
+                                                     theApp.TheTemperatureAlarmObj);
     }
 }
 
