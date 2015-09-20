@@ -52,6 +52,10 @@ function TheApp() {
     this.TheTemperatureAlarmObj = null;
 
     this.TheTemperatureAlarmRateLimit = TEMPERATURE_ALARM_RATE_LIMIT_MS;
+
+    //MooseBox Version Information.
+    this.TheFanCtrlDaemonVersion = null;
+    this.TheTemperatureDaemonVersion = null;
 }
 
 /**
@@ -117,10 +121,10 @@ function main(argv) {
             //  5. Prime the Fan Automation with the current temperature reading.
             //  6. Enable the REST API.
             //    fin.
-            theApp.TheMooseBoxDataStore.getFanCtrlDaemonVersion(onGetFanCtrlDaemonVersion);
-            theApp.TheMooseBoxDataStore.getTemperatureDaemonVersion(onGetTemperatureDaemonVersion);
-            theApp.TheMooseBoxDataStore.getFanCtrlConfig(onGetFanCtrlConfig.bind(null, theApp));
-            theApp.TheMooseBoxDataStore.getTemperatureConfig(onGetTemperatureConfig.bind(null, theApp));
+            theApp.TheMooseBoxDataStore.getFanCtrlDaemonVersion(onGetFanCtrlDaemonVersion.bind(null, theApp));
+            theApp.TheMooseBoxDataStore.getTemperatureDaemonVersion(onGetTemperatureDaemonVersion.bind(null, theApp));
+            theApp.TheMooseBoxDataStore.getFanAutomationConfig(onGetFanAutomationConfig.bind(null, theApp));
+            theApp.TheMooseBoxDataStore.getTemperatureAlarmConfig(onGetTemperatureAlarmConfig.bind(null, theApp));
         }
         else
             result = false;
@@ -167,23 +171,33 @@ function displayVersion() {
 /**
  * Handler rountine for the Fan Ctrl Daemon version number.
  *
+ * @param theApp [Bound] Instance to the top-level instance lookup object.
  * @param err Error information if applicable.
  * @param versionStr Daemon version.
  */
-function onGetFanCtrlDaemonVersion(err, versionStr) {
-    if (!err && versionStr && 0 != versionStr.length)
+function onGetFanCtrlDaemonVersion(theApp, err, versionStr) {
+    if (!err && versionStr && 0 !== versionStr.length)
+    {
         console.log2('Fan Ctrl Daemon: v' + versionStr);
+
+        theApp.TheFanCtrlDaemonVersion = versionStr;
+    }
 }
 
 /**
  * Handler rountine for the Temperature Daemon version number.
  *
+ * @param theApp [Bound] Instance to the top-level instance lookup object.
  * @param err Error information if applicable.
  * @param versionStr Daemon version.
  */
-function onGetTemperatureDaemonVersion(err, versionStr) {
-    if (!err && versionStr && 0 != versionStr.length)
+function onGetTemperatureDaemonVersion(theApp, err, versionStr) {
+    if (!err && versionStr && 0 !== versionStr.length)
+    {
         console.log2('Temperature Daemon: v' + versionStr);
+
+        theApp.TheTemperatureDaemonVersion = versionStr;
+    }
 }
 
 /**
@@ -193,7 +207,7 @@ function onGetTemperatureDaemonVersion(err, versionStr) {
  * @param err Error information if applicable.
  * @param configObj Queried configuration data, which may be null.
  */
-function onGetFanCtrlConfig(theApp, err, configObj) {
+function onGetFanAutomationConfig(theApp, err, configObj) {
     console.log2('Fan Automation ConfigObj Response.');
 
     //Invoke worker logic; only create a new TemperatureAlarm if it doesn't exist.
@@ -209,13 +223,35 @@ function onGetFanCtrlConfig(theApp, err, configObj) {
  * @param err Error information if applicable.
  * @param configObj Queried configuration data, which may be null.
  */
-function onGetTemperatureConfig(theApp, err, configObj) {
+function onGetTemperatureAlarmConfig(theApp, err, configObj) {
     console.log2('TemperatureAlarm ConfigObj Response.');
 
     //Invoke worker logic; only create a new TemperatureAlarm if it doesn't exist.
     _configResWorker(theApp, err, configObj, function(actualConfig) {
         theApp.TheTemperatureAlarmObj = new TemperatureAlarm(theApp.TheTemperatureAlarmRateLimit, actualConfig);
     });
+}
+
+/**
+ * Handler routine for allowing the REST API 'partial' class to lookup version info.
+ *
+ * @return Object with appropiately filled in version information.
+ */
+function onGetVersionInformation(theApp) {
+    var obj = {};
+
+    //MooseBox Web Server Version.
+    obj.WebService = MOOSE_BOX_WEB_SERVICE_VERSION;
+
+    //MooseBox Fan Ctrl Daemon Version.
+    if (theApp.TheFanCtrlDaemonVersion)
+        obj.FanCtrlDaemon = theApp.TheFanCtrlDaemonVersion;
+
+    //MooseBox Temperature Daemon Version.
+    if (theApp.TheTemperatureDaemonVersion)
+        obj.TemperatureDaemon = theApp.TheTemperatureDaemonVersion;
+
+    return obj;
 }
 
                                 /*************************/
@@ -265,7 +301,8 @@ function _configResWorker(theApp, err, configObj, callback) {
         theApp.TheHandlersREST = new RESTAPIHandlers(theApp.TheMooseBoxPubSub,
                                                      theApp.TheMooseBoxDataStore,
                                                      theApp.TheFanAutomationObj,
-                                                     theApp.TheTemperatureAlarmObj);
+                                                     theApp.TheTemperatureAlarmObj,
+                                                     onGetVersionInformation.bind(null, theApp));
     }
 }
 

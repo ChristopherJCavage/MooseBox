@@ -145,7 +145,7 @@ function monitorTemperatureSensors(jsonConfigRoot, hostname, port) {
     mooseBoxPubSub = new MooseBoxPubSub(hostname, port);
 
     //Report our version number first; unconditionally.
-    mooseBoxDataStore.setFanCtrlDaemonVersion(MOOSE_BOX_TEMPERATURE_DAEMON_VERSION);
+    mooseBoxDataStore.setTemperatureDaemonVersion(MOOSE_BOX_TEMPERATURE_DAEMON_VERSION);
 
     //All of our configuration information is maintained in the Datastore. Query that first.
     var allSerialNumbers = [];

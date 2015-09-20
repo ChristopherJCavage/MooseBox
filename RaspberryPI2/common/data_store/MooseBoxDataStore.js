@@ -134,7 +134,7 @@ MooseBoxDataStore.prototype.addFanCtrlReading = function(fanNumber, powerOn, tim
     if (!timestamp)
         throw 'timestamp cannot be null';
 
-    //Fan readings are sporadic; always add them to the current and historical datasets.
+    //Fan readings also are added to the current and historical datasets.
     var currentReadingKey = this.m_mbrKeys.getFanCtrlCurrentReadingKey(fanNumber);
     var histReadingKey = this.m_mbrKeys.getFanCtrlHistoricalReadingKey(fanNumber);
 
@@ -152,6 +152,53 @@ MooseBoxDataStore.prototype.addFanCtrlReading = function(fanNumber, powerOn, tim
             this.m_redisC.zadd(histReadingKey, timestamp, jsonText, callback);
         else if (callback)
             callback(err, reply);
+    }.bind(this));
+}
+
+/**
+ * Erases all Fan Control data associated with a specific USB Fan Number.
+ *
+ * @param fanNumber Zero-based integer describing the MooseBox fan number.
+ * @param Optional callback to be invoked with error information.
+ * @remarks O(log(N) + N); Where N = Number of readings in the sorted set.
+ */
+MooseBoxDataStore.prototype.clearFanCtrlData = function(fanNumber, callback) {
+    //Parameter Validations.
+    if (null === fanNumber || undefined === fanNumber)
+        throw 'fanNumber cannot be null';
+
+    if (fanNumber < 0)
+        throw 'fanNumber cannot be negative';
+
+    //Build the Fan Redis Key.
+    var histReadingKey = this.m_mbrKeys.getFanCtrlHistoricalReadingKey(fanNumber);
+
+    //Wipe out the entire sorted set.
+    this.m_redisC.zremrangebyrank(histReadingKey, 0, -1, function(err, response) {
+        if (callback)
+            callback(err);
+    }.bind(this));
+}
+
+/**
+ * Erases all Temperature data associated with a specific USB Fan Number.
+ *
+ * @param serialNumber Serial number of the iButtonLink T-Probe sensor.
+ * @param Optional callback to be invoked with error information.
+ * @remarks O(log(N) + N); Where N = Number of readings in the sorted set.
+ */
+MooseBoxDataStore.prototype.clearTemperatureData = function(serialNumber, callback) {
+    //Parameter Validations.
+    if (!serialNumber || 0 === serialNumber.length)
+        throw 'serialNumber cannot be null / empty';
+
+    //Build the Temperature Redis Key.
+    var histReadingKey = this.m_mbrKeys.getTemperatureHistoricalReadingKey(serialNumber);
+
+    //Wipe out the entire sorted set.
+    this.m_redisC.zremrangebyrank(histReadingKey, 0, -1, function(err, response) {
+        if (callback)
+            callback(err);
     }.bind(this));
 }
 
@@ -245,6 +292,9 @@ MooseBoxDataStore.prototype.getFirstLastTemperatureTimestamps = function(serialN
  */
 MooseBoxDataStore.prototype.queryCurrentFanCtrl = function(fanNumber, callback) {
     //Parameter Validations.
+    if (null === fanNumber || undefined === fanNumber)
+        throw 'fanNumber cannot be null';
+
     if (fanNumber < 0)
         throw 'fanNumber cannot be negative';
 
@@ -270,6 +320,9 @@ MooseBoxDataStore.prototype.queryCurrentFanCtrl = function(fanNumber, callback) 
  */
 MooseBoxDataStore.prototype.queryHistoricalFanCtrl = function(fanNumber, startTimestamp, endTimestamp, callback) {
     //Parameter Validations.
+    if (null === fanNumber || undefined === fanNumber)
+        throw 'fanNumber cannot be null';
+
     if (fanNumber < 0)
         throw 'fanNumber cannot be negative';
 
@@ -305,6 +358,9 @@ MooseBoxDataStore.prototype.queryHistoricalFanCtrl = function(fanNumber, startTi
  */
 MooseBoxDataStore.prototype.getFirstLastFanCtrlTimestamps = function(fanNumber, callback) {
     //Parameter Validations.
+    if (null === fanNumber || undefined === fanNumber)
+        throw 'fanNumber cannot be null';
+
     if (fanNumber < 0)
         throw 'fanNumber cannot be negative';
 
@@ -322,8 +378,8 @@ MooseBoxDataStore.prototype.getFirstLastFanCtrlTimestamps = function(fanNumber, 
  *                 Context-speicific JSON configuration data object is provided.
  * @remarks O(1)
  */
-MooseBoxDataStore.prototype.getAlarmsConfig = function(callback) {
-    this._getValueWorker(this.m_mbrKeys.CONFIG_ALARMS_KEY, callback);
+MooseBoxDataStore.prototype.getTemperatureAlarmConfig = function(callback) {
+    this._getValueWorker(this.m_mbrKeys.CONFIG_TEMPERATURE_ALARM_KEY, callback);
 }
 
 /**
@@ -333,19 +389,8 @@ MooseBoxDataStore.prototype.getAlarmsConfig = function(callback) {
  *                 Context-speicific JSON configuration data object is provided.
  * @remarks O(1)
  */
-MooseBoxDataStore.prototype.getFanCtrlConfig = function(callback) {
-    this._getValueWorker(this.m_mbrKeys.CONFIG_FAN_CTRL_DAEMON_KEY, callback);
-}
-
-/**
- * Queries configuration data for the Temperature Daemon.
- *
- * @param callback Callback of type function(err, configObj) to be invoked when query is complete.
- *                 Context-speicific JSON configuration data object is provided.
- * @remarks O(1)
- */
-MooseBoxDataStore.prototype.getTemperatureConfig = function(callback) {
-    this._getValueWorker(this.m_mbrKeys.CONFIG_TEMPERATURE_DAEMON_KEY, callback);
+MooseBoxDataStore.prototype.getFanAutomationConfig = function(callback) {
+    this._getValueWorker(this.m_mbrKeys.CONFIG_FAN_AUTOMATION_KEY, callback);
 }
 
 /**
@@ -408,8 +453,8 @@ MooseBoxDataStore.prototype.getTemperatureSensorSerialNumbers = function(callbac
  * @param callback Optional callback of type function(err) to invoke for error information.
  * @remarks O(1)
  */
-MooseBoxDataStore.prototype.setAlarmsConfig = function(configObj, callback) {
-    this._setValueWorker(this.m_mbrKeys.CONFIG_ALARMS_KEY, configObj, callback);
+MooseBoxDataStore.prototype.setTemperatureAlarmConfig = function(configObj, callback) {
+    this._setValueWorker(this.m_mbrKeys.CONFIG_TEMPERATURE_ALARM_KEY, configObj, callback);
 }
 
 /**
@@ -419,19 +464,8 @@ MooseBoxDataStore.prototype.setAlarmsConfig = function(configObj, callback) {
  * @param callback Optional callback of type function(err) to invoke for error information.
  * @remarks O(1)
  */
-MooseBoxDataStore.prototype.setFanCtrlConfig = function(configObj, callback) {
-    this._setValueWorker(this.m_mbrKeys.CONFIG_FAN_CTRL_DAEMON_KEY, configObj, callback);
-}
-
-/**
- * Stores configuration data for the Temperature Daemon.
- *
- * @param configObj Context-specfic JSON configuration data object to be stored.
- * @param callback Optional callback of type function(err) to invoke for error information.
- * @remarks O(1)
- */
-MooseBoxDataStore.prototype.setTemperatureConfig = function(configObj, callback) {
-    this._setValueWorker(this.m_mbrKeys.CONFIG_TEMPERATURE_DAEMON_KEY, configObj, callback);
+MooseBoxDataStore.prototype.setFanAutomationConfig = function(configObj, callback) {
+    this._setValueWorker(this.m_mbrKeys.CONFIG_FAN_AUTOMATION_KEY, configObj, callback);
 }
 
 /**

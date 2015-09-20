@@ -19,7 +19,9 @@ var MooseBoxDataStore = require('../common/data_store/MooseBoxDataStore.js');
 var TemperatureAlarm = require('./TemperatureAlarm.js');
 
 var bodyParser = require('body-parser');
+var disk = require('diskusage');
 var express = require('express');
+var os = require('os');
 
 /**
  * Defines all supported REST API versions of MooseBox.
@@ -38,7 +40,11 @@ RESTAPIHandlers.prototype.API_VERSION_v1_0 = 'v1.0';
  * @remarks All handler methods below will be commented with the REST API interface, as 
  *          opposed to the JavaScript routine interface.
  */
-function RESTAPIHandlers(mooseBoxPubSubRef, mooseBoxDataStoreRef, fanAutomationRef, temperatureAlarmRef) {
+function RESTAPIHandlers(mooseBoxPubSubRef,
+                         mooseBoxDataStoreRef,
+                         fanAutomationRef,
+                         temperatureAlarmRef,
+                         versionInfoCallback) {
     var port = process.env.PORT || 8080;
 
     //Parameter Validations.
@@ -54,6 +60,9 @@ function RESTAPIHandlers(mooseBoxPubSubRef, mooseBoxDataStoreRef, fanAutomationR
     if (!temperatureAlarmRef)
         throw 'temperatureAlarmRef cannot be null';
 
+    if (!versionInfoCallback)
+        throw 'versionInfoCallback cannot be null';
+
     //Set Members
     this.m_express = new express();
     this.m_router = express.Router();
@@ -62,6 +71,8 @@ function RESTAPIHandlers(mooseBoxPubSubRef, mooseBoxDataStoreRef, fanAutomationR
     this.m_mooseBoxPubSubRef = mooseBoxPubSubRef;
     this.m_fanAutomationRef = fanAutomationRef;
     this.m_temperatureAlarmRef = temperatureAlarmRef;
+
+    this.m_versionInfoCallback = versionInfoCallback;
 
     //Configure Express routing.
     this.m_express.use(bodyParser.urlencoded({ extended: true }));
@@ -77,6 +88,10 @@ function RESTAPIHandlers(mooseBoxPubSubRef, mooseBoxDataStoreRef, fanAutomationR
 
     this.m_router.route('/automation/fan/unregister').delete(this.onFanAutomationUnregister.bind(this));
 
+    this.m_router.route('/peripherals/fan/data/clear').delete(this.onFanCtrlDataClear.bind(this));
+
+    this.m_router.route('/peripherals/temperature/data/clear').delete(this.onTemperatureSensorDataClear.bind(this));
+
                                                 /* GET */
     this.m_router.route('/alarms/temperature/list').get(this.onTemperatureAlarmList.bind(this));
 
@@ -88,6 +103,9 @@ function RESTAPIHandlers(mooseBoxPubSubRef, mooseBoxDataStoreRef, fanAutomationR
     this.m_router.route('/peripherals/temperature/data/query').get(this.onTemperatureSensorDataQuery.bind(this));
     this.m_router.route('/peripherals/temperature/serial_numbers/query').get(this.onTemperatureSensorSerialNumbersQuery.bind(this));
     this.m_router.route('/peripherals/temperature/timestamps/query').get(this.onTemperatureSensorTimestampsQuery.bind(this));
+
+    this.m_router.route('/system/memory/query').get(this.onSystemMemoryInfoQuery.bind(this));
+    this.m_router.route('/system/version/query').get(this.onSystemVersionInfoQuery.bind(this));
 
                                                 /* PUT */
     this.m_router.route('/alarms/temperature/register').put(this.onTemperatureAlarmRegister.bind(this));
@@ -148,6 +166,40 @@ RESTAPIHandlers.prototype.onFanAutomationUnregister = function(req, res) {
 }
 
 /**
+ * DELETE /MooseBox/API/v1.0/peripherals/fan/data/clear
+ *
+ * Summary:
+ *   Clears all historical data associated with a USB Fan Number.
+ *
+ * Parameters:
+ *   fan_number - Required - USB fan number to query control data from.
+ *
+ * Responses:
+ *   200 - OK
+ *   400 - Bad Request
+ *   500 - Internal Server Error
+ */
+RESTAPIHandlers.prototype.onFanCtrlDataClear = function(req, res) {
+    try {
+        console.log2('REST onFanCtrlDataClear');
+
+        //Query Parameter Validations.
+        if (!req.query.fan_number)
+            res.status(400).send('Missing Parameter(s)');
+        else //Erasing is an irreversable operation!
+            this.m_mooseBoxDataStoreRef.clearFanCtrlData(parseInt(req.query.fan_number), function(err) {
+                if (!err)
+                    res.status(200).end();
+                else
+                    res.status(500).send(err);
+            }.bind(this));
+    }
+    catch(err) {
+        res.status(500).send(err);
+    }
+}
+
+/**
  * DELETE /MooseBox/API/v1.0/alarms/temperature/unregister
  *
  * Summary:
@@ -187,6 +239,40 @@ RESTAPIHandlers.prototype.onTemperatureAlarmUnregister = function(req, res) {
         }
     }
     catch(err) {
+        res.status(500).send(err);
+    }
+}
+
+/**
+ * DELETE /MooseBox/API/v1.0/temperature/data/clear
+ *
+ * Summary:
+ *   Clears all historical data associated with an iButtonLink T-Probe Temperature Sensor.
+ *
+ * Parameters:
+ *   serial_number - Required - Sensor serial number to delete data from.
+ *
+ * Responses:
+ *   200 - OK
+ *   400 - Bad Request
+ *   500 - Internal Server Error
+ */
+RESTAPIHandlers.prototype.onTemperatureSensorDataClear = function(req, res) {
+    try {
+        console.log2('REST onTemperatureSensorDataClear');
+
+        //Query Parameter Validations.
+        if (!req.query.serial_number)
+            res.status(400).send('Missing Parameter(s)');
+        else //Erasing is an irreversable operation!
+            this.m_mooseBoxDataStoreRef.clearTemperatureData(req.query.serial_number, function(err) {console.log('1: ' + err);
+                if (!err)
+                    res.status(200).end();
+                else
+                    res.status(500).send(err);
+            }.bind(this));
+    }
+    catch(err) { console.log('2: ' + err);
         res.status(500).send(err);
     }
 }
@@ -359,7 +445,72 @@ RESTAPIHandlers.prototype.onFanAutomationList = function(req, res) {
     catch(err) {
         res.status(500).send(err);
     }
+}
 
+/**
+ * GET /MooseBox/API/v1.0/system/memory/query
+ *
+ *   Summary:
+ *     Queries RAM and disk memory information for the MooseBox system.
+ *
+ *   Responses:
+ *     200 - OK
+ *     500 - Internal Server Error
+ */
+RESTAPIHandlers.prototype.onSystemMemoryInfoQuery = function(req, res) {
+    try {
+        console.log2('REST onSystemMemoryInfoQuery');
+
+        var obj = {};
+
+        //RAM Information.
+        obj.RAMFreeBytes = os.freemem();
+        obj.RAMTotalBytes = os.totalmem();
+
+        //Piggy-back running time.
+        obj.TotalRuntimeS = os.uptime();
+
+        //Disk Information.
+        disk.check('/', function(err, info) {
+            if (!err && info)
+            {
+                //Info is in bytes.
+                obj.DiskFreeBytes = info.free;
+                obj.DiskTotalBytes = info.total;
+
+                res.status(200).json(obj);
+            }
+            else
+                res.status(500).send(err);
+        }.bind(this));
+    }
+    catch(err) {
+        res.status(500).send(err);
+    }
+}
+
+/**
+ * GET /MooseBox/API/v1.0/system/version/query
+ *
+ *   Summary:
+ *     Queries as much version information as possible for the MooseBox system.
+ *
+ *   Responses:
+ *     200 - OK
+ *     500 - Internal Server Error
+ */
+RESTAPIHandlers.prototype.onSystemVersionInfoQuery = function(req, res) {
+    try {
+        console.log2('REST onSystemVersionInfoQuery');
+
+        var obj = this.m_versionInfoCallback();
+
+        //Set response data.
+        res.status(200).json(obj);
+    }
+    catch(err) {
+        res.status(500).send(err);
+    }
 }
 
 /**
@@ -725,9 +876,9 @@ RESTAPIHandlers.prototype.onFanCtrlPower = function(req, res) {
     }
 }
 
-                                /*******************/
-                                /*** PRIVATE API ***/
-                                /*******************/
+                                /*****************************/
+                                /*** PRIVATE API (Workers) ***/
+                                /*****************************/
 
 /**
  * Worker method to query current state of FanAutomation and stores it in RedisDB.
@@ -743,7 +894,7 @@ RESTAPIHandlers.prototype._saveFanAutomation = function(callback) {
     var configObj = this.m_fanAutomationRef.getConfigObj();
 
     //Write it to RedisDB.
-    this.m_mooseBoxDataStoreRef.setFanCtrlConfig(configObj, callback);
+    this.m_mooseBoxDataStoreRef.setFanAutomationConfig(configObj, callback);
 }
 
 /**
@@ -760,7 +911,7 @@ RESTAPIHandlers.prototype._saveTemperatureAlarm = function(callback) {
     var configObj = this.m_temperatureAlarmRef.getAlarmsConfig();
 
     //Write it to RedisDB.
-    this.m_mooseBoxDataStoreRef.setTemperatureConfig(configObj, callback);
+    this.m_mooseBoxDataStoreRef.setTemperatureAlarmConfig(configObj, callback);
 }
 
 /**
@@ -787,32 +938,3 @@ RESTAPIHandlers.prototype._isEmpty = function(obj) {
 
 //Export this class outside this file.
 module.exports = RESTAPIHandlers;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

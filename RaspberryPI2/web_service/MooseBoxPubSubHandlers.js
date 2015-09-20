@@ -18,6 +18,9 @@ var MooseBoxDataStore = require('../common/data_store/MooseBoxDataStore.js');
 var MooseBoxPubSub = require('../common/data_store/MooseBoxPubSub.js');
 var MooseBoxRedisDefaults = require('../common/data_store/MooseBoxRedisDefaults.js');
 
+var dateFormat = require('dateformat');
+var email = require('./node_modules/emailjs/email');
+
 /**
  * Defines an abstraction for a module of handler methods specific to the RedisDB Pub/Sub.
  * This is the main/top-level of the application, and so we have knowledge of all the 
@@ -102,9 +105,9 @@ MooseBoxPubSubHandlers.prototype.onTemperatureReadingNotify = function(readingOb
 
     console.log2('Temperature Alarms Checked (Tripped: ' + emailAddressList.length + ')');
 
-    //TODO:  Find an email library.
+    //Send emails to all subscribers in which this condition triggered an alarm.
     for (i = 0; i < emailAddressList.length; i++)
-        ;
+        this._sendAlarmNotificationEmail(emailAddressList[i], readingObj);
 
     //Again, for every reading from every sensor, ascertain how the 1...N fans need to be powered.
     var fanPowerCtrlList = this.m_fanAutomationRef.getPowerStateInstructions(readingObj.SerialNumber, readingObj.Celsius);
@@ -161,6 +164,49 @@ MooseBoxPubSubHandlers.prototype._refreshTemperatureSensorSubscriptionsWorker = 
             this.m_subscribedTempSerialNumSet[serialNumbers[i]] = true;
         }
     }
+}
+
+/**
+ * Sends an email via the MooseBox GMail account with Temperature Alarm details.
+ *
+ * @param emailAddress Recipient email address (i.e. subscriber).
+ * @param readingObj Temperature reading that triggered the alarm.
+ */
+MooseBoxPubSubHandlers.prototype._sendAlarmNotificationEmail = function(emailAddress, readingObj) {
+    //Parameter Validations.
+    if (!emailAddress)
+        throw 'emailAddress cannot be null';
+
+    if (!readingObj)
+        throw 'readingObj cannot be null';
+
+    //Make a meaningful email message; note that, we use \n instead of <br>.  No markups.
+    var contentsObj = { text:    '', 
+                        from:    'MooseBox - DoNotReply <MooseBoxPI@gmail.com>', 
+                        to:      emailAddress,
+                        subject: 'MooseBox Temperature Alarm Triggered!' };
+
+    contentsObj.text += 'THIS IS AN AUTO-GENERATED MESSAGE. PLEASE DO NOT REPLY.\n';
+    contentsObj.text += '\n';
+    contentsObj.text +=  '------ MooseBox Temperature Alarm Details ------\n';
+    contentsObj.text += '\n';
+    contentsObj.text += '\tTimestamp (UTC):  ' + dateFormat(readingObj.Timestamp, 'yyyy-mm-dd hh:MM:ss') + '\n';
+    contentsObj.text += '\tSerial Number: ' + readingObj.SerialNumber + '\n';
+    contentsObj.text += '\tTemperature: ' + readingObj.Celsius + ' C, ' + convertToFahrenheit(readingObj.Celsius) + ' F\n';
+
+    //MooseBox has a unique GMail account setup for alarming.  We do not hardcode this information however.
+    var configObj = { user:     process.env.MOOSEBOX_EMAIL_USER,
+                      password: process.env.MOOSEBOX_EMAIL_PASS,
+                      host:     'smtp.gmail.com', 
+                      ssl:      true };
+
+    var mailserver  = email.server.connect(configObj);
+
+    mailserver.send(contentsObj, function(err, message) {
+        //Report error to console; we don't really have any other avenue for this.
+        if (err)
+            console.log2('Email Error: ' + err);
+    });
 }
 
 /**

@@ -23,9 +23,8 @@
  */
 function MooseBoxRedisKeys() {
     //Data; Configuration.
-    this.CONFIG_ALARMS_KEY = 'MooseBox:Data:Config:Alarms';
-    this.CONFIG_FAN_CTRL_DAEMON_KEY = 'MooseBox:Data:Config:FanCtrlDaemon';
-    this.CONFIG_TEMPERATURE_DAEMON_KEY = 'MooseBox:Data:Config:TemperatureDaemon';
+    this.CONFIG_FAN_AUTOMATION_KEY = 'MooseBox:Data:Config:FanAutomation';
+    this.CONFIG_TEMPERATURE_ALARM_KEY = 'MooseBox:Data:Config:TemperatureAlarm';
 
     //Data; System Info.
     this.DAEMON_VERSION_FAN_CTRL_KEY = 'MooseBox:Data:System:Versions:FanCtrlDaemon';
