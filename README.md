@@ -40,3 +40,6 @@ Following are some pictures to showing the MooseBox during different phases:
 
 **20150915:** Devs-Eye-View of the whole Pub/Sub working with Fan Automation:
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/PubSub_DevelView.png)
+
+**20150930** Early progress of the wood framework for sausage curing racks:
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/201509_MooseBox.jpeg)
