@@ -47,6 +47,24 @@ namespace MooseBoxUI.Client
         }
         #endregion
 
+        #region Accessors (static)
+        /// <summary>
+        /// Gets the Temperature Sensor with serial #F7000002A215B828.
+        /// </summary>
+        internal static TemperatureSensor _F7000002A215B828
+        {
+            get { return s_F7000002A215B828.Value; }
+        }
+
+        /// <summary>
+        /// Gets the Temperature Sensor with serial #59000002A218F928.
+        /// </summary>
+        internal static TemperatureSensor _59000002A218F928
+        {
+            get { return s_59000002A218F928.Value; }
+        }
+        #endregion
+
         #region Constructor(s)
         /// <summary>
         /// Constructor.
@@ -183,5 +201,8 @@ namespace MooseBoxUI.Client
         private readonly IMooseBoxRESTAPI m_mooseBoxRESTAPI;
 
         private static readonly TimeSpan MaxQueryableTimeSpan = new TimeSpan(1, 30, 0);
+
+        private static readonly Lazy<TemperatureSensor> s_F7000002A215B828 = new Lazy<TemperatureSensor>(() => { return new TemperatureSensor("F7002A215B828", MooseBoxRESTAPIFactory.Instance.Create()); }, true);
+        private static readonly Lazy<TemperatureSensor> s_59000002A218F928 = new Lazy<TemperatureSensor>(() => { return new TemperatureSensor("59002A218F928", MooseBoxRESTAPIFactory.Instance.Create()); }, true);
     }
 }

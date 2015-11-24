@@ -347,7 +347,7 @@ RESTAPIHandlers.prototype.onFanCtrlDataQuery = function(req, res) {
         }
         else //We are performing a current data query.
             this.m_mooseBoxDataStoreRef.queryCurrentFanCtrl(req.query.fan_number, function(err, fanNumber, obj) {
-                if (!err && obj && false === _isEmpty(obj))
+                if (!err && obj)
                 {
                     //Build a response list of count = 1 and send.
                     var currentReading = [];
@@ -356,7 +356,7 @@ RESTAPIHandlers.prototype.onFanCtrlDataQuery = function(req, res) {
 
                     res.status(200).json(currentReading);
                 }
-                else if ((!err && !obj) || (obj && true == _isEmpty(obj)))
+                else if (!err && !obj)
                     res.status(204).send('No Data Available');
                 else
                     res.status(500).send(err);
@@ -607,7 +607,7 @@ RESTAPIHandlers.prototype.onTemperatureSensorDataQuery = function(req, res) {
         }
         else //We are performing a current data query.
             this.m_mooseBoxDataStoreRef.queryCurrentTemperature(req.query.serial_number, function(err, serialNumber, obj) {
-                if (!err && obj && false === _isEmpty(obj))
+                if (!err && obj)
                 {
                     //Build a response list of count = 1 and send.
                     var currentReading = [];
@@ -616,7 +616,7 @@ RESTAPIHandlers.prototype.onTemperatureSensorDataQuery = function(req, res) {
 
                     res.status(200).json(currentReading);
                 }
-                else if ((!err && !obj) || (obj && true == _isEmpty(obj)))
+                else if (!err && !obj)
                     res.status(204).send('No Data Available');
                 else
                     res.status(500).send(err);

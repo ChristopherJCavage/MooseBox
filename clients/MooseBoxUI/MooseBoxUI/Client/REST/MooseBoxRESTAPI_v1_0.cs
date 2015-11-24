@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>. //
 //////////////////////////////////////////////////////////////////////////
 using MooseBoxUI.Client;
+using MooseBoxUI.Utility;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
@@ -60,7 +61,7 @@ namespace MooseBoxUI.Client.REST
             //Call Worker.
             await RESTWorker("/MooseBox/API/v1.0/peripherals/fan/data/clear",
                              Method.DELETE,
-                             restRequest => { restRequest.AddParameter(ParamFanNumber, fanNumber); });
+                             restRequest => { restRequest.AddQueryParameter(ParamFanNumber, fanNumber.ToString()); });
         }
 
         /// <summary>
@@ -72,12 +73,12 @@ namespace MooseBoxUI.Client.REST
         public async Task PowerFanCtrl(Byte fanNumber, bool powerOn)
         {
             //Call Worker.
-            await RESTWorker("/MooseBox/API/v1.0/peripherals/fan/data/clear",
+            await RESTWorker("/MooseBox/API/v1.0/control/fan/power",
                              Method.PUT,
                              restRequest =>
                              {
-                                 restRequest.AddParameter(ParamFanNumber, fanNumber);
-                                 restRequest.AddParameter(ParamPowerOn, powerOn);
+                                 restRequest.AddQueryParameter(ParamFanNumber, fanNumber.ToString());
+                                 restRequest.AddQueryParameter(ParamPowerOn, powerOn.ToString().ToLower());
                              });
         }
 
@@ -94,10 +95,11 @@ namespace MooseBoxUI.Client.REST
                                                                                 DateTime.MaxValue,
                                                                                 false);
 
-            //Return the latest reading from the list, which should be count 1.
-            Debug.Assert(readings.Count > 0);
-
-            return readings.Last();
+            //Return the latest reading from the list, which should be count 1...
+            if (readings.Count > 0)
+                return readings.Last();
+            else
+                return Tuple.Create(false, DateTime.MinValue);
         }
 
         /// <summary>
@@ -130,7 +132,7 @@ namespace MooseBoxUI.Client.REST
             //Call Worker.
             IRestResponse restResponse = await RESTWorker("/MooseBox/API/v1.0/peripherals/fan/timestamps/query",
                                                           Method.GET,
-                                                          restRequest => { restRequest.AddParameter(ParamFanNumber, fanNumber); });
+                                                          restRequest => { restRequest.AddQueryParameter(ParamFanNumber, fanNumber.ToString()); });
 
             //Parse resultant data.
             dynamic jsonResult = JsonConvert.DeserializeObject(restResponse.Content);
@@ -163,9 +165,9 @@ namespace MooseBoxUI.Client.REST
                              Method.PUT,
                              restRequest => 
                                 {
-                                    restRequest.AddParameter(ParamFanNumber, fanNumber);
-                                    restRequest.AddParameter(ParamSerialNumber, serialNumber);
-                                    restRequest.AddParameter(ParamCelsiusThreshold, celsiusThreshold);
+                                    restRequest.AddQueryParameter(ParamFanNumber, fanNumber.ToString());
+                                    restRequest.AddQueryParameter(ParamSerialNumber, serialNumber);
+                                    restRequest.AddQueryParameter(ParamCelsiusThreshold, celsiusThreshold.ToString());
                                 });
         }
 
@@ -179,7 +181,7 @@ namespace MooseBoxUI.Client.REST
             //Call Worker.
             await RESTWorker("/MooseBox/API/v1.0/automation/fan/unregister",
                              Method.DELETE,
-                             restRequest => { restRequest.AddParameter(ParamFanNumber, fanNumber); });
+                             restRequest => { restRequest.AddQueryParameter(ParamFanNumber, fanNumber.ToString()); });
         }
 
         /// <summary>
@@ -324,10 +326,10 @@ namespace MooseBoxUI.Client.REST
                               Method.PUT,
                               restRequest =>
                                   {
-                                      restRequest.AddParameter(ParamSerialNumber, serialNumber);
-                                      restRequest.AddParameter(ParamCelsiusMin, celsiusMin);
-                                      restRequest.AddParameter(ParamCelsiusMax, celsiusMax);
-                                      restRequest.AddParameter(ParamEmailAddress, emailAddress);
+                                      restRequest.AddQueryParameter(ParamSerialNumber, serialNumber);
+                                      restRequest.AddQueryParameter(ParamCelsiusMin, celsiusMin.ToString());
+                                      restRequest.AddQueryParameter(ParamCelsiusMax, celsiusMax.ToString());
+                                      restRequest.AddQueryParameter(ParamEmailAddress, emailAddress);
                                   });
         }
 
@@ -358,11 +360,11 @@ namespace MooseBoxUI.Client.REST
             await RESTWorker("/MooseBox/API/v1.0/alarms/temperature/unregister",
                               Method.DELETE,
                               restRequest => 
-                                 { 
-                                     restRequest.AddParameter(ParamEmailAddress, emailAddress); 
+                                 {
+                                     restRequest.AddQueryParameter(ParamEmailAddress, emailAddress); 
 
                                      if (string.IsNullOrEmpty(serialNumber) == false)
-                                         restRequest.AddParameter(ParamSerialNumber, serialNumber); 
+                                         restRequest.AddQueryParameter(ParamSerialNumber, serialNumber); 
                                  });
         }
 
@@ -375,7 +377,7 @@ namespace MooseBoxUI.Client.REST
             List<TemperatureAlarmConfig> registeredAlarms = new List<TemperatureAlarmConfig>();
 
             //Call Worker.
-            IRestResponse restResponse = await RESTWorker("/MooseBox/API/v1.0/automation/fan/list", Method.GET);
+            IRestResponse restResponse = await RESTWorker("/MooseBox/API/v1.0/alarms/temperature/list", Method.GET);
 
             //Parse results; from MooseBox's TemperatureAlarm.js:
             //
@@ -397,28 +399,32 @@ namespace MooseBoxUI.Client.REST
             //          //...et cetera
             //      ]
             //  }
-            dynamic jsonResult = JsonConvert.DeserializeObject(restResponse.Content);
-
-            foreach (dynamic registeredAlarm in registeredAlarms)
+            try
             {
-                TemperatureAlarmConfig temperatureAlarmConfig = new TemperatureAlarmConfig();
+                dynamic jsonResult = JsonConvert.DeserializeObject(restResponse.Content);
 
-                temperatureAlarmConfig.SerialNumber = registeredAlarm.SerialNumber;
-                temperatureAlarmConfig.Subscribers = new List<TemperatureAlarmSubscriber>();
-
-                foreach (dynamic subscriber in registeredAlarm.Subscriber)
+                foreach (dynamic registeredAlarm in jsonResult.RegisteredAlarms)
                 {
-                    TemperatureAlarmSubscriber temperatureAlarmSubscriber = new TemperatureAlarmSubscriber();
+                    TemperatureAlarmConfig temperatureAlarmConfig = new TemperatureAlarmConfig();
 
-                    temperatureAlarmSubscriber.Email = subscriber.Email;
-                    temperatureAlarmSubscriber.CelsiusMin = subscriber.CelsiusMin;
-                    temperatureAlarmSubscriber.CelsiusMax = subscriber.CelsiusMax;
+                    temperatureAlarmConfig.SerialNumber = registeredAlarm.SerialNumber;
+                    temperatureAlarmConfig.Subscribers = new List<TemperatureAlarmSubscriber>();
 
-                    temperatureAlarmConfig.Subscribers.Add(temperatureAlarmSubscriber);
+                    foreach (dynamic subscriber in registeredAlarm.Subscribers)
+                    {
+                        TemperatureAlarmSubscriber temperatureAlarmSubscriber = new TemperatureAlarmSubscriber();
+
+                        temperatureAlarmSubscriber.Email = subscriber.EmailAddress;
+                        temperatureAlarmSubscriber.CelsiusMin = subscriber.CelsiusMin;
+                        temperatureAlarmSubscriber.CelsiusMax = subscriber.CelsiusMax;
+
+                        temperatureAlarmConfig.Subscribers.Add(temperatureAlarmSubscriber);
+                    }
+
+                    registeredAlarms.Add(temperatureAlarmConfig);
                 }
-
-                registeredAlarms.Add(temperatureAlarmConfig);
             }
+            catch { /* no registered alarms */ }
 
             return registeredAlarms;
         }
@@ -439,7 +445,7 @@ namespace MooseBoxUI.Client.REST
             //Call Worker.
             await RESTWorker("/MooseBox/API/v1.0/temperature/data/clear",
                              Method.DELETE,
-                             restRequest => { restRequest.AddParameter(ParamSerialNumber, serialNumber); });
+                             restRequest => { restRequest.AddQueryParameter(ParamSerialNumber, serialNumber); });
         }
 
         /// <summary>
@@ -514,7 +520,7 @@ namespace MooseBoxUI.Client.REST
             //Call Worker.
             dynamic jsonResult = await RESTWorker("/MooseBox/API/v1.0/peripherals/temperature/timestamps/query",
                                                   Method.GET,
-                                                  restRequest => { restRequest.AddParameter(ParamSerialNumber, serialNumber); });
+                                                  restRequest => { restRequest.AddQueryParameter(ParamSerialNumber, serialNumber); });
 
             //Parse resultant data.
             startTimestamp = jsonResult.StartTimestamp;
@@ -557,12 +563,28 @@ namespace MooseBoxUI.Client.REST
                                                           restRequest =>
                                                               { 
                                                                   restRequest.AddParameter(ParamFanNumber, fanNumber);
-                                                                  restRequest.AddParameter(ParamTimestampStart, startTimestamp);
-                                                                  restRequest.AddParameter(ParamTimestampStop, stopTimestamp);
+
+                                                                  if (restrictByTime == true)
+                                                                  {
+                                                                      restRequest.AddQueryParameter(ParamTimestampStart, startTimestamp.ToUnixTicks().ToString());
+                                                                      restRequest.AddQueryParameter(ParamTimestampStop, stopTimestamp.ToUnixTicks().ToString());
+                                                                  }
                                                               });
 
             //Parse resultant data.
-            dynamic jsonResult = JsonConvert.DeserializeObject(restResponse.Content);
+            try
+            {
+                dynamic jsonResult = JsonConvert.DeserializeObject(restResponse.Content);
+
+                foreach (var entry in jsonResult)
+                {
+                    DateTime timestamp = ExtensionMethods.FromUnixTicks(Convert.ToDouble(entry.Timestamp));
+                    bool powerOn = entry.PowerOn;
+
+                    fanCtrlData.Add(Tuple.Create(powerOn, timestamp));
+                }
+            }
+            catch (Exception) { }
 
             return fanCtrlData;
         }
@@ -598,13 +620,25 @@ namespace MooseBoxUI.Client.REST
                                                           Method.GET,
                                                           restRequest =>
                                                               {
-                                                                  restRequest.AddParameter(ParamFanNumber, serialNumber);
-                                                                  restRequest.AddParameter(ParamTimestampStart, startTimestamp);
-                                                                  restRequest.AddParameter(ParamTimestampStop, stopTimestamp);
+                                                                  restRequest.AddParameter(ParamSerialNumber, serialNumber);
+
+                                                                  if (restrictByTime == true)
+                                                                  {
+                                                                      restRequest.AddQueryParameter(ParamTimestampStart, startTimestamp.ToUnixTicks().ToString());
+                                                                      restRequest.AddQueryParameter(ParamTimestampStop, stopTimestamp.ToUnixTicks().ToString());
+                                                                  }
                                                               });
 
             //Parse resultant data.
             dynamic jsonResult = JsonConvert.DeserializeObject(restResponse.Content);
+
+            foreach (var entry in jsonResult)
+            {
+                DateTime timestamp = ExtensionMethods.FromUnixTicks(Convert.ToDouble(entry.Timestamp));
+                Single celsius = Convert.ToSingle(entry.Celsius);
+
+                temperatureData.Add(Tuple.Create(timestamp, celsius));
+            }
 
             return temperatureData;
         }
@@ -663,6 +697,9 @@ namespace MooseBoxUI.Client.REST
 
             //Buid the REST Request.
             RestRequest restRequest = new RestRequest(resource, method);
+
+            restRequest.AddHeader("Accept", "application/json");
+            restRequest.Parameters.Clear();
 
             addParamAction(restRequest);
 

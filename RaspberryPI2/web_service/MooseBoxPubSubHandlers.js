@@ -182,7 +182,7 @@ MooseBoxPubSubHandlers.prototype._sendAlarmNotificationEmail = function(emailAdd
 
     //Make a meaningful email message; note that, we use \n instead of <br>.  No markups.
     var contentsObj = { text:    '', 
-                        from:    'MooseBox - DoNotReply <MooseBoxPI@gmail.com>', 
+                        from:    'MooseBox - DoNotReply <' + process.env.MOOSEBOX_EMAIL_USER + '@gmail.com>', 
                         to:      emailAddress,
                         subject: 'MooseBox Temperature Alarm Triggered!' };
 

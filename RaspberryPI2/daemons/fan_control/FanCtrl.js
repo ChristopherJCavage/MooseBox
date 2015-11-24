@@ -135,13 +135,15 @@ function automaticPowerUSBPort(hostname, port) {
 
                 console.log(timestampStr + ' - Request. Fan: ' + obj.FanNumber + ', Power: ' + obj.PowerOn);
 
-                //Set new value, even if it's the same as the current value.
-                yepKitYKUSH.setPower(obj.FanNumber, obj.PowerOn, function(err, reply) {
-                    //if the operation was successful, update the DataStore; for a local process
-                    //on a local machine, we're not going to bother with Pub/Sub responses.
-                    if (!err && reply)
-                        mooseBoxDataStore.addFanCtrlReading(obj.Port, obj.PowerOn, obj.Timestamp);
-                });
+                //Set new value, even if it's the same as the current value; we use the synchronous
+                //version here becuase we discovered an anamoly during testing where the async version
+                //exec isn't actually completing the operation and if you fire 3 fans high or low at 
+                //once only the first is ever transacted.
+                yepKitYKUSH.setPowerSync(obj.FanNumber, obj.PowerOn);
+
+                //if the operation was successful, update the DataStore; for a local process
+                //on a local machine, we're not going to bother with Pub/Sub responses.
+                mooseBoxDataStore.addFanCtrlReading(obj.Port, obj.PowerOn, obj.Timestamp);
             });
         });
 

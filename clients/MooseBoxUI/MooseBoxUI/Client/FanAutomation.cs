@@ -25,7 +25,7 @@ namespace MooseBoxUI.Client
     /// <summary>
     /// Defines an abstraction for automated fan control based on a [1...N] temperature sensors.
     /// </summary>
-    internal sealed class FanAutomation
+    public sealed class FanAutomation
     {
         #region Public Methods (static)
         /// <summary>
@@ -112,7 +112,7 @@ namespace MooseBoxUI.Client
                 Debug.Assert(value != null);
                 Debug.Assert(value.Item1 != null);
 
-                if (value.Item1 == temperatureSensor && value.Item2 == celsiusThreshold)
+                if (value.Item1.Equals(temperatureSensor) == true && value.Item2 == celsiusThreshold)
                     return; //Nothing to do!
 
                 unregisterPrev = true;
@@ -185,6 +185,21 @@ namespace MooseBoxUI.Client
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Tests whether a USB Fan is registered for automation.
+        /// </summary>
+        /// <param name="fan">USB Fan to test.</param>
+        /// <returns>true if registered; false otherwise.</returns>
+        internal bool IsRegistered(Fan fan)
+        {
+            //Parameter Validations.
+            if (fan == null)
+                throw new ArgumentNullException("Fan fan");
+
+            //Lookup its existance in the cache.
+            return m_registeredFansDict.ContainsKey(fan);
         }
         #endregion
 

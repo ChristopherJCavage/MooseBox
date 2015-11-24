@@ -25,20 +25,22 @@ namespace MooseBoxUI.Client
     /// <summary>
     /// Defines an abstraction for [0...N] Temperature Alarms which are synchronized to MooseBox.
     /// </summary>
-    internal sealed class TemperatureAlarm
+    public sealed class TemperatureAlarm
     {
         #region Public Methods (static)
         /// <summary>
         /// Queries the current state of all temperature alarms on MooseBox.
         /// </summary>
         /// <returns>Current temperature alarm data.</returns>
-        internal static async Task<List<TemperatureAlarmConfig>> QueryCurrentTemperatureAlarms()
+        internal static async Task<TemperatureAlarm> QueryCurrentTemperatureAlarms()
         {
             IMooseBoxRESTAPI mooseBoxRESTAPI = MooseBoxRESTAPIFactory.Instance.Create();
 
             List<TemperatureAlarmConfig> registeredAlarms = await mooseBoxRESTAPI.ListTemperatureAlarmConfig();
 
-            return registeredAlarms;
+            TemperatureAlarm temperatureAlarm = new TemperatureAlarm(mooseBoxRESTAPI, registeredAlarms);
+
+            return temperatureAlarm;
         }
         #endregion
 
@@ -177,7 +179,7 @@ namespace MooseBoxUI.Client
 
             //Enumerate each entry in the dictionary associated with this sensor.
             foreach (var kvp in m_registeredAlarmsDict)
-                if (kvp.Key.Item1 == temperatureSensor)
+                if (kvp.Key.Item1.Equals(temperatureSensor) == true)
                     registeredAlarms.Add(Tuple.Create(kvp.Key.Item2, kvp.Value.Item1, kvp.Value.Item2));
 
             return (registeredAlarms.Count > 0);

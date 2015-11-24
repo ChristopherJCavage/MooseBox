@@ -35,7 +35,7 @@ namespace MooseBoxUI.Client.REST
         }
 
         /// <summary>
-        /// Gets the singletone instance for the MooseBox REST API factory.
+        /// Gets the singleton instance for the MooseBox REST API factory.
         /// </summary>
         internal static MooseBoxRESTAPIFactory Instance
         {
@@ -112,7 +112,7 @@ namespace MooseBoxUI.Client.REST
         /// Registers a base web address URL for the MooseBox REST API.
         /// </summary>
         /// <param name="baseUrlStr">Base URL address to the MooseBox, which should be "MooseBox."</param>
-        void Register(string baseUrlStr)
+        internal void Register(string baseUrlStr)
         {
             //Parameter Validations.
             if (string.IsNullOrEmpty(baseUrlStr) == true)
@@ -122,7 +122,7 @@ namespace MooseBoxUI.Client.REST
                 throw new ArgumentException("Invalid Url. Found: " + base.ToString(), "Uri baseUrlStr");
 
             //Is it already registered?
-            if (string.IsNullOrEmpty(m_baseUrlStr) == true)
+            if (string.IsNullOrEmpty(m_baseUrlStr) == false)
                 throw new InvalidOperationException(string.Format("Base URL already registered. URL: {0}", m_baseUrlStr));
 
             //Set Member.

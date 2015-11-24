@@ -28,11 +28,6 @@ namespace MooseBoxUI.Client
     {
         #region Accessors (static)
         /// <summary>
-        /// Gets USB Fan #0.
-        /// </summary>
-        internal static Fan Fan0 { get { return s_fan0.Value; } }
-
-        /// <summary>
         /// Gets USB Fan #1.
         /// </summary>
         internal static Fan Fan1 { get { return s_fan1.Value; } }
@@ -41,6 +36,11 @@ namespace MooseBoxUI.Client
         /// Gets USB Fan #2.
         /// </summary>
         internal static Fan Fan2 { get { return s_fan2.Value; } }
+
+        /// <summary>
+        /// Gets USB Fan #3.
+        /// </summary>
+        internal static Fan Fan3 { get { return s_fan3.Value; } }
         #endregion
 
         #region Constructor(s)
@@ -52,10 +52,11 @@ namespace MooseBoxUI.Client
         internal Fan(Byte fanNumber, IMooseBoxRESTAPI mooseBoxRESTAPI)
         {
             //Parameter Validations.
-            if (fanNumber >= NumberOfFans)
+            if (fanNumber < MinFanNumber || fanNumber > MaxFanNumber)
                 throw new ArgumentOutOfRangeException("Byte fanNumber",
-                                                      string.Format("0 <= Fan <= {1}. Found: {2}",
-                                                                    NumberOfFans,
+                                                      string.Format("{0} <= Fan <= {1}. Found: {2}",
+                                                                    MinFanNumber,
+                                                                    MaxFanNumber,
                                                                     fanNumber));
 
             if (mooseBoxRESTAPI == null)
@@ -191,14 +192,15 @@ namespace MooseBoxUI.Client
 
         private readonly Byte m_fanNumber;
 
-        private const Byte NumberOfFans = 3;
+        private const Byte MinFanNumber = 1;
+        private const Byte MaxFanNumber = 3;
 
         private readonly IMooseBoxRESTAPI m_mooseBoxRESTAPI;
 
         private static readonly TimeSpan MaxQueryableTimeSpan = new TimeSpan(2, 0, 0);
 
-        private static readonly Lazy<Fan> s_fan0 = new Lazy<Fan>(() => { return new Fan(0, MooseBoxRESTAPIFactory.Instance.Create()); }, true);
         private static readonly Lazy<Fan> s_fan1 = new Lazy<Fan>(() => { return new Fan(1, MooseBoxRESTAPIFactory.Instance.Create()); }, true);
         private static readonly Lazy<Fan> s_fan2 = new Lazy<Fan>(() => { return new Fan(2, MooseBoxRESTAPIFactory.Instance.Create()); }, true);
+        private static readonly Lazy<Fan> s_fan3 = new Lazy<Fan>(() => { return new Fan(3, MooseBoxRESTAPIFactory.Instance.Create()); }, true);
     }
 }
