@@ -17,4 +17,8 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>. #
 ########################################################################
 
-forever /home/pi/MooseBox/daemons/fan_control/FanCtrl.js start -d
+# Setup some important path variables; we might be executed before this is setup.
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+
+# Start the Fan Control Daemon.
+forever start /home/pi/MooseBox/daemons/fan_control/FanCtrl.js start -d

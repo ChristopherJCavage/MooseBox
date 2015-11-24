@@ -17,4 +17,8 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>. #
 ########################################################################
 
-forever /home/pi/MooseBox/daemons/temperature/Temperature.js -d -f /home/pi/MooseBox/daemons/temperature/temperature_daemon.config.js
+# Setup some important path variables; we might be executed before this is setup.
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+
+# Start the Temperature Daemon.
+forever start /home/pi/MooseBox/daemons/temperature/Temperature.js -d -f /home/pi/MooseBox/daemons/temperature/temperature_daemon.config.js

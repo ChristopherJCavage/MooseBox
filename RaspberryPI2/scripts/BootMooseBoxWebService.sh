@@ -17,4 +17,12 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>. #
 ########################################################################
 
-forever /home/pi/MooseBox/web_service/main.js start -d -f /home/pi/MooseBox/web_service/mboxwebservice.config.json
+# Setup some important path variables; we might be executed before this is setup.
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+
+# Setup MooseBox email account for Temperature Alarms.
+export MOOSEBOX_EMAIL_USER= #SET ME!
+export MOOSEBOX_EMAIL_PASS= #SET ME!
+
+# Start the Web Service.
+forever start /home/pi/MooseBox/web_service/main.js start -d -f /home/pi/MooseBox/web_service/mboxwebservice.config.json
