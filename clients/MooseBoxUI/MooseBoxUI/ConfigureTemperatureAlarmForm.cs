@@ -58,6 +58,8 @@ namespace MooseBoxUI
         /// <param name="e">Generic event args.</param>
         private void comboBoxTemperatureSensors_SelectedIndexChanged(object sender, EventArgs e)
         {
+            LoadData(true);
+
             Update();
         }
 
@@ -148,7 +150,7 @@ namespace MooseBoxUI
         /// </summary>
         private void Reload()
         {
-            LoadData();
+            LoadData(false);
 
             Update();
         }
@@ -156,7 +158,7 @@ namespace MooseBoxUI
         /// <summary>
         /// Worker method to reload all Temperature Alarmt data.
         /// </summary>
-        private void LoadData()
+        private void LoadData(bool addEmailAddresses)
         {
             //Query the current state of all Temperature Alarms.
             m_temperatureAlarm = AsyncHelper.RunSync(() => { return TemperatureAlarm.QueryCurrentTemperatureAlarms(); });
@@ -170,14 +172,12 @@ namespace MooseBoxUI
             //Configure the ComboxBox now.
             try
             {
-                TemperatureSensor[] temperatureSensors = new TemperatureSensor[] { TemperatureSensor._59000002A218F928,
-                                                                                   TemperatureSensor._F7000002A215B828 };
-
-                foreach (TemperatureSensor temperatureSensor in temperatureSensors)
+                if (addEmailAddresses == true)
                 {
                     List<Tuple<string, Single, Single>> registeredAlarms = null;
+                    TemperatureSensor selectedTemperatureSensor = GetSelectedTemperatureSensor();
 
-                    if (m_temperatureAlarm.TryGetRegistrationInfo(temperatureSensor, out registeredAlarms) == true)
+                    if (m_temperatureAlarm.TryGetRegistrationInfo(selectedTemperatureSensor, out registeredAlarms) == true)
                     {
                         Debug.Assert(registeredAlarms != null);
 

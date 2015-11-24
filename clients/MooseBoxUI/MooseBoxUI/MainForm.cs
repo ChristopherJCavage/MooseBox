@@ -122,6 +122,55 @@ namespace MooseBoxUI
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender">Instance of object raising event.</param>
+        /// <param name="e">Generic event args.</param>
+        private void clearTemperatureDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Ensure the user really wants to do this!
+            if (DialogResult.Yes != MessageBox.Show("Are you sure you want to delete all historical temperature data?",
+                                                    "Confirm",
+                                                    MessageBoxButtons.YesNo,
+                                                    MessageBoxIcon.Question,
+                                                    MessageBoxDefaultButton.Button2))
+                return;
+
+            //Delete all temperature data.
+            AsyncHelper.RunSync(() => { return TemperatureSensor._59000002A218F928.Clear(); });
+            AsyncHelper.RunSync(() => { return TemperatureSensor._F7000002A215B828.Clear(); });
+
+            MessageBox.Show("Data successfully cleared",
+                            "Success",
+                            MessageBoxButtons.OK);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender">Instance of object raising event.</param>
+        /// <param name="e">Generic event args.</param>
+        private void clearFanControlDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Ensure the user really wants to do this!
+            if (DialogResult.Yes != MessageBox.Show("Are you sure you want to delete all historical fan power data?",
+                                                    "Confirm",
+                                                    MessageBoxButtons.YesNo,
+                                                    MessageBoxIcon.Question,
+                                                    MessageBoxDefaultButton.Button2))
+                return;
+
+            //Delete all fan ctrl data.
+            AsyncHelper.RunSync(() => { return Fan.Fan1.Clear(); });
+            AsyncHelper.RunSync(() => { return Fan.Fan2.Clear(); });
+            AsyncHelper.RunSync(() => { return Fan.Fan3.Clear(); });
+
+            MessageBox.Show("Data successfully cleared",
+                            "Success",
+                            MessageBoxButtons.OK);
+        }
+
+        /// <summary>
         /// UI Handler for Windows.Forms timer elapsed.
         /// </summary>
         /// <param name="sender">Instance of object raising event.</param>
@@ -139,8 +188,8 @@ namespace MooseBoxUI
 
                         //Kick off all of the Temperature Queries.
                         Tuple<DateTime, Single> _F7000002A215B828Reading = AsyncHelper.RunSync(() => { return TemperatureSensor._F7000002A215B828.QueryCurrentReading(); });
-                        /*Tuple<DateTime, Single> _59000002A218F928Reading = AsyncHelper.RunSync(() => { return TemperatureSensor._59000002A218F928.QueryCurrentReading(); });
-                        */
+                        Tuple<DateTime, Single> _59000002A218F928Reading = AsyncHelper.RunSync(() => { return TemperatureSensor._59000002A218F928.QueryCurrentReading(); });
+                        
                         //Kick off all of the SysInfo Queries.
                         Tuple<UInt64, UInt64> memoryInfo = AsyncHelper.RunSync(() => { return SysInfo.MooseBox.QuerySystemInformation(); });
                         
@@ -151,7 +200,7 @@ namespace MooseBoxUI
                                 UpdateFanLED(Fan.Fan2, fan2Reading.Item1);
                                 UpdateFanLED(Fan.Fan3, fan3Reading.Item1);
 
-                        //       UpdateTemperatureIndicator(TemperatureSensor._59000002A218F928, _59000002A218F928Reading.Item2);
+                                UpdateTemperatureIndicator(TemperatureSensor._59000002A218F928, _59000002A218F928Reading.Item2);
                                 UpdateTemperatureIndicator(TemperatureSensor._F7000002A215B828, _F7000002A215B828Reading.Item2);
                                 
                                 UpdateMemoryIndicator(textBoxTotalMemory, memoryInfo.Item2);

@@ -443,7 +443,7 @@ namespace MooseBoxUI.Client.REST
                 throw new ArgumentNullException("string serialNumber");
 
             //Call Worker.
-            await RESTWorker("/MooseBox/API/v1.0/temperature/data/clear",
+            await RESTWorker("/MooseBox/API/v1.0/peripherals/temperature/data/clear",
                              Method.DELETE,
                              restRequest => { restRequest.AddQueryParameter(ParamSerialNumber, serialNumber); });
         }

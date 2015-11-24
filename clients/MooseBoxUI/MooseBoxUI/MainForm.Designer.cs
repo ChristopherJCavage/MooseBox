@@ -66,6 +66,9 @@
             this.configureAlarmsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.advancedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearTemperatureDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearFanControlDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFan)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFan1LED)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFan2LED)).BeginInit();
@@ -365,6 +368,7 @@
             this.menuStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fansToolStripMenuItem,
             this.temperatureToolStripMenuItem,
+            this.advancedToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStripMain.Location = new System.Drawing.Point(0, 0);
             this.menuStripMain.Name = "menuStripMain";
@@ -421,9 +425,32 @@
             // aboutToolStripMenuItem1
             // 
             this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem1.Text = "About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
+            // 
+            // advancedToolStripMenuItem
+            // 
+            this.advancedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearTemperatureDataToolStripMenuItem,
+            this.clearFanControlDataToolStripMenuItem});
+            this.advancedToolStripMenuItem.Name = "advancedToolStripMenuItem";
+            this.advancedToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
+            this.advancedToolStripMenuItem.Text = "Advanced";
+            // 
+            // clearTemperatureDataToolStripMenuItem
+            // 
+            this.clearTemperatureDataToolStripMenuItem.Name = "clearTemperatureDataToolStripMenuItem";
+            this.clearTemperatureDataToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.clearTemperatureDataToolStripMenuItem.Text = "Clear Temperature Data";
+            this.clearTemperatureDataToolStripMenuItem.Click += new System.EventHandler(this.clearTemperatureDataToolStripMenuItem_Click);
+            // 
+            // clearFanControlDataToolStripMenuItem
+            // 
+            this.clearFanControlDataToolStripMenuItem.Name = "clearFanControlDataToolStripMenuItem";
+            this.clearFanControlDataToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.clearFanControlDataToolStripMenuItem.Text = "Clear Fan Control Data";
+            this.clearFanControlDataToolStripMenuItem.Click += new System.EventHandler(this.clearFanControlDataToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -521,6 +548,9 @@
         private System.Windows.Forms.ToolStripMenuItem automationConfigToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem configureAlarmsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem advancedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearTemperatureDataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearFanControlDataToolStripMenuItem;
     }
 }
 

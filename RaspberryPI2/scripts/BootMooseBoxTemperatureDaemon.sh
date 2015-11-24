@@ -21,4 +21,4 @@
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
 # Start the Temperature Daemon.
-forever start /home/pi/MooseBox/daemons/temperature/Temperature.js -d -f /home/pi/MooseBox/daemons/temperature/temperature_daemon.config.js
+forever start /home/pi/MooseBox/daemons/temperature/Temperature.js -f /home/pi/MooseBox/daemons/temperature/temperature_daemon.config.json -d
