@@ -95,13 +95,14 @@ ChainedTempSensorMonitor.prototype.onIntervalElapsed = function() {
                     if (celsius < this.m_linkUSBDS18B20.MIN_TEMPERATURE_CELSIUS)
                         celsius = this.m_linkUSBDS18B20.MIN_TEMPERATURE_CELSIUS;
                     else if (celsius > this.m_linkUSBDS18B20.MAX_TEMPERATURE_CELSIUS)
-                        celsius = this.this.m_linkUSBDS18B20.MAX_TEMPERATURE_CELSIUS;
+                        celsius = this.m_linkUSBDS18B20.MAX_TEMPERATURE_CELSIUS;
 
                     //Create reading object.
                     var reading = {};
 
                     reading.Celsius = celsius;
                     reading.Timestamp = Date.now();
+                    reading.TTY = this.m_linkUSBDS18B20.getTTY();
 
                     //Publish.
                     this.emit('data', reading);

@@ -1,7 +1,14 @@
 {
-    "LinkUSBTTYs": [
-        "/dev/ttyUSB0"
-    ],
+    "LinkUSBs":
+    [
+        {
+            "TTY": "/dev/ttyUSB0",
+            "DigiTempConfigPath": "/etc/digitemp.F70000021215B828.conf"
+        },
 
-    "DigiTempConfigPath": "/etc/digitemp.conf"
+        {
+            "TTY": "/dev/ttyUSB1",
+            "DigiTempConfigPath": "/etc/digitemp.59000002A218F928.conf"
+        }
+    ]
 }

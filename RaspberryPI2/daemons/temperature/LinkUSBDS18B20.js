@@ -70,9 +70,10 @@ function LinkUSBDS18B20(configPath, tty) {
  *
  * @param num Sensor number to query, as ordered in the digitemp configuraiton file
  * @param callback Function of the type [err, temperatureCelsius].
+ * @param tty TTY associated with this LinkUSB instance.
  * @remarks Recommend having sensors sorted in the configuration file.
  */
-LinkUSBDS18B20.prototype.readAsync = function(num, callback) {
+LinkUSBDS18B20.prototype.readAsync = function(num, callback, tty) {
     //Parameter Validations.
     if (num < 0)
         throw 'num cannot be negative';
@@ -97,9 +98,9 @@ LinkUSBDS18B20.prototype.readAsync = function(num, callback) {
 
             //If we didn't complete successfully, then it's an error.  Build a message.
             if (error || stderr)
-                callback("error: " + error + ", stderr: " + stderr, 0);
+                callback("error: " + error + ", stderr: " + stderr, 0, this.m_tty);
             else if (stdout)
-                callback(null, parseFloat(stdout)); //Cmd string enforces numeric string output and only that.
+                callback(null, parseFloat(stdout), this.m_tty); //Cmd string enforces numeric string output and only that.
         }.bind(this));
     }
     catch(err) {
@@ -114,6 +115,15 @@ LinkUSBDS18B20.prototype.readAsync = function(num, callback) {
  */
 LinkUSBDS18B20.prototype.isBusy = function() {
     return this.m_isBusy;
+}
+
+/**
+ * Gets the TTY associated with this LinkUSB instance.
+ *
+ * @return TTY.
+ */
+LinkUSBDS18B20.prototype.getTTY = function() {
+    return this.m_tty;
 }
 
 /**
@@ -140,7 +150,7 @@ LinkUSBDS18B20.prototype.getSensorSerialNumbers = function(callback) {
     fs.readFile(this.m_configPath, function(err, data) {
         //If there is an error; bubble it up.
         if (err)
-            callback(err);
+            callback(err, null, this.m_configPath, this.m_tty);
         else
         {
             var sensorSerialNumbers = [];
@@ -166,7 +176,7 @@ LinkUSBDS18B20.prototype.getSensorSerialNumbers = function(callback) {
                             var tokens = lines[j].split(' ');
 
                             if (tokens.length < 10)
-                                callback('Line parse error. Length (tokens): ' + tokens.length + ' Line: ' + lines[j], null);
+                                callback('Line parse error. Length (tokens): ' + tokens.length + ' Line: ' + lines[j], null, this.m_configPath, this.m_tty);
                             else
                             {
                                 //Build a hex number (serialized backwards; endianness); do a level of indirection to get rid of '0x' naturally.
@@ -184,7 +194,7 @@ LinkUSBDS18B20.prototype.getSensorSerialNumbers = function(callback) {
                 }
 
             //Invoke user's callback and give what we can.
-            callback(null, sensorSerialNumbers);
+            callback(null, sensorSerialNumbers, this.m_configPath, this.m_tty);
         }
     }.bind(this));
 }

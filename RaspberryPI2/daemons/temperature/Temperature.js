@@ -25,7 +25,7 @@ var dateFormat = require('dateformat');
 var fs = require('fs');
 
 //Constants
-var MOOSE_BOX_TEMPERATURE_DAEMON_VERSION = '0.0.1';
+var MOOSE_BOX_TEMPERATURE_DAEMON_VERSION = '0.0.2';
 
 /**
  * Main entry point for MooseBox Fan Control Daemon.
@@ -100,16 +100,13 @@ function reportCurrentTemperatureStatus(jsonConfigRoot, ttys) {
     if (!ttys)
         throw 'ttys cannot be null';
 
-    //We may have 0...N TTYs for the LinkUSB to RJ-45 adapters.
-    for(i = 0; i < ttys.length; i++)
+    //We may have 0...N TTYs and 0...M 1-wire sensors for the LinkUSB to RJ-45 adapters.
+    for(i = 0; i < jsonConfigRoot.LinkUSBs.length; i++)
     {
-        //Alias the TTY so we can pretty-print it in a closure.
-        var tty = ttys[i];
-
         //Construct a new LinkUSB device which has 0...N sensors daisy-chained on it and query.
-        linkUSBDS18B20 = new LinkUSBDS18B20(jsonConfigRoot.DigiTempConfigPath, tty);
+        linkUSBDS18B20 = new LinkUSBDS18B20(jsonConfigRoot.LinkUSBs[i].DigiTempConfigPath, jsonConfigRoot.LinkUSBs[i].TTY);
 
-        linkUSBDS18B20.readAsync(linkUSBDS18B20.SENSOR0, function(err, celsius) {
+        linkUSBDS18B20.readAsync(linkUSBDS18B20.SENSOR0, function(err, celsius, tty) {
             //Pretty-print output.
             if (err)
                 console.log('Temperature acquisition error (' + tty + '). Err: ' + err);
@@ -154,19 +151,20 @@ function monitorTemperatureSensors(jsonConfigRoot, hostname, port) {
     //Our JSON config should contain all the TTYs to monitor and the location of the
     //DigiTemp's configuration file.  While we're here, let's build a map of all the
     //sensors we're supporting that are daisy-chained to each LinkUSB device.
-    for(i = 0; i < jsonConfigRoot.LinkUSBTTYs.length; i++)
+    //for(i = 0; i < jsonConfigRoot.LinkUSBTTYs.length; i++)
+    for(i = 0; i < jsonConfigRoot.LinkUSBs.length; i++)
     {
         //Alias the TTY now to make life easier.
-        var tty = jsonConfigRoot.LinkUSBTTYs[i];
+        var tty = jsonConfigRoot.LinkUSBs[i].TTY;
 
         //Instantiate a new LinkUSB abstraction to perform serial number parsing.
-        linkUSBDS18B20 = new LinkUSBDS18B20(jsonConfigRoot.DigiTempConfigPath, tty);
+        linkUSBDS18B20 = new LinkUSBDS18B20(jsonConfigRoot.LinkUSBs[i].DigiTempConfigPath, tty);
 
-        linkUSBDS18B20.getSensorSerialNumbers(function(err, serialNumbers) {
+        linkUSBDS18B20.getSensorSerialNumbers(function(err, serialNumbers, digiTempConfigPath, tty_) {
             if (!err)
             {
                 //Add the list of serial numbers to the map for this TTY.
-                ttySerialNumbersMap[tty] = serialNumbers
+                ttySerialNumbersMap[tty_] = serialNumbers
 
                 allSerialNumbers = allSerialNumbers.concat(serialNumbers);
 
@@ -178,13 +176,16 @@ function monitorTemperatureSensors(jsonConfigRoot, hostname, port) {
                 mooseBoxPubSub.publishTemperatureSensorSerialNumbers(serialNumbers);
 
                 //Start monitoring this TTY and it's temperature sensors.
-                chainedTempSensorMonitor = new ChainedTempSensorMonitor(jsonConfigRoot.DigiTempConfigPath, tty);
+                chainedTempSensorMonitor = new ChainedTempSensorMonitor(digiTempConfigPath, tty_);
 
                 chainedTempSensorMonitor.on('data', function(readingObj) {
                     //Pretty-print to console for devel-purposes.
                     var timestampStr = dateFormat('yyyy-mm-dd_hh:MM:ss');
 
-                    console.log(timestampStr + ' [' + serialNumbers[0] + '] - ' + readingObj.Celsius + ' C, ' + convertToFahrenheit(readingObj.Celsius) + ' F');
+                    //Lookup serial number once for ease of use.
+                    var serialNumber = ttySerialNumbersMap[readingObj.TTY];
+
+                    console.log(timestampStr + ' [' + serialNumber + '] - ' + readingObj.Celsius + ' C, ' + convertToFahrenheit(readingObj.Celsius) + ' F');
 
                     //Publish new data to the RedisDB Pub/Sub and accumulate it in the historical readings.
                     //I wrote the RedisDB Time-series accumulator (i.e. Sorted Set) to have an optional argument
@@ -208,12 +209,12 @@ function monitorTemperatureSensors(jsonConfigRoot, hostname, port) {
                     // *NOTE: Recall that as of 9/12/2015 my father decided to not daisy-chain temperature sensors
                     //        from the LinkUSB device.  Instead, we're having one T-Probe per LinkUSB device. 
                     //        For now, that means we know we just have length:1 arrays.  TBD in the future though.
-                    mooseBoxDataStore.addTemperatureReading(serialNumbers[0], readingObj.Celsius, readingObj.Timestamp, true, function(err, reply) {
+                    mooseBoxDataStore.addTemperatureReading(serialNumber, readingObj.Celsius, readingObj.Timestamp, true, function(err, reply) {
                         if (err)
                             console.log('Datastore Error. Err: ' + err);
                     });
 
-                    mooseBoxPubSub.publishTemperatureReadingNotify(serialNumbers[0], readingObj.Celsius, readingObj.Timestamp);
+                    mooseBoxPubSub.publishTemperatureReadingNotify(serialNumber, readingObj.Celsius, readingObj.Timestamp);
                 });
 
                 //Begin infinite long-polling!
