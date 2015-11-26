@@ -71,3 +71,6 @@ Following are some pictures to showing the MooseBox during different phases:
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/CreateNewTemperatureAlarm.PNG)
 
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/FanManualOverride_RevA.PNG)
+
+**20151126:** Example of MooseBox Temperature Alarm Email
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxTempAlarmEmail_RevA.PNG)
