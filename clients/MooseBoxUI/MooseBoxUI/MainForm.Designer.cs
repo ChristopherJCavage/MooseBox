@@ -64,11 +64,12 @@
             this.automationConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.temperatureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureAlarmsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.advancedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearHistoricalDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.advancedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.clearTemperatureDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.clearFanControlDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.plotTemperatureDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFan)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFan1LED)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFan2LED)).BeginInit();
@@ -414,6 +415,23 @@
             this.configureAlarmsToolStripMenuItem.Text = "Configure Alarms";
             this.configureAlarmsToolStripMenuItem.Click += new System.EventHandler(this.configureAlarmsToolStripMenuItem_Click);
             // 
+            // advancedToolStripMenuItem
+            // 
+            this.advancedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.plotTemperatureDataToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.clearHistoricalDataToolStripMenuItem});
+            this.advancedToolStripMenuItem.Name = "advancedToolStripMenuItem";
+            this.advancedToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
+            this.advancedToolStripMenuItem.Text = "Advanced";
+            // 
+            // clearHistoricalDataToolStripMenuItem
+            // 
+            this.clearHistoricalDataToolStripMenuItem.Name = "clearHistoricalDataToolStripMenuItem";
+            this.clearHistoricalDataToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.clearHistoricalDataToolStripMenuItem.Text = "Clear Historical Data";
+            this.clearHistoricalDataToolStripMenuItem.Click += new System.EventHandler(this.clearHistoricalDataToolStripMenuItem_Click);
+            // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -425,32 +443,21 @@
             // aboutToolStripMenuItem1
             // 
             this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
             this.aboutToolStripMenuItem1.Text = "About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
             // 
-            // advancedToolStripMenuItem
+            // plotTemperatureDataToolStripMenuItem
             // 
-            this.advancedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearTemperatureDataToolStripMenuItem,
-            this.clearFanControlDataToolStripMenuItem});
-            this.advancedToolStripMenuItem.Name = "advancedToolStripMenuItem";
-            this.advancedToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
-            this.advancedToolStripMenuItem.Text = "Advanced";
+            this.plotTemperatureDataToolStripMenuItem.Name = "plotTemperatureDataToolStripMenuItem";
+            this.plotTemperatureDataToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.plotTemperatureDataToolStripMenuItem.Text = "Plot Temperature Data";
+            this.plotTemperatureDataToolStripMenuItem.Click += new System.EventHandler(this.plotTemperatureDataToolStripMenuItem_Click);
             // 
-            // clearTemperatureDataToolStripMenuItem
+            // toolStripSeparator1
             // 
-            this.clearTemperatureDataToolStripMenuItem.Name = "clearTemperatureDataToolStripMenuItem";
-            this.clearTemperatureDataToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
-            this.clearTemperatureDataToolStripMenuItem.Text = "Clear Temperature Data";
-            this.clearTemperatureDataToolStripMenuItem.Click += new System.EventHandler(this.clearTemperatureDataToolStripMenuItem_Click);
-            // 
-            // clearFanControlDataToolStripMenuItem
-            // 
-            this.clearFanControlDataToolStripMenuItem.Name = "clearFanControlDataToolStripMenuItem";
-            this.clearFanControlDataToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
-            this.clearFanControlDataToolStripMenuItem.Text = "Clear Fan Control Data";
-            this.clearFanControlDataToolStripMenuItem.Click += new System.EventHandler(this.clearFanControlDataToolStripMenuItem_Click);
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(189, 6);
             // 
             // MainForm
             // 
@@ -549,8 +556,9 @@
         private System.Windows.Forms.ToolStripMenuItem configureAlarmsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem advancedToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem clearTemperatureDataToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem clearFanControlDataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearHistoricalDataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem plotTemperatureDataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     }
 }
 

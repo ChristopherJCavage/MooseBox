@@ -135,11 +135,15 @@ namespace MooseBoxUI.Client.REST
                                                           restRequest => { restRequest.AddQueryParameter(ParamFanNumber, fanNumber.ToString()); });
 
             //Parse resultant data.
-            dynamic jsonResult = JsonConvert.DeserializeObject(restResponse.Content);
+            try
+            {
+                dynamic jsonResult = JsonConvert.DeserializeObject(restResponse.Content);
 
-            startTimestamp = jsonResult.StartTimestamp;
-            stopTimestamp = jsonResult.StopTimestamp;
-
+                startTimestamp = jsonResult.StartTimestamp;
+                stopTimestamp = jsonResult.EndTimestamp;
+            }
+            catch { Debug.Assert(false); }
+            
             return Tuple.Create(startTimestamp, stopTimestamp);
         }
         #endregion
@@ -518,14 +522,20 @@ namespace MooseBoxUI.Client.REST
                 throw new ArgumentNullException("string serialNumber");
 
             //Call Worker.
-            dynamic jsonResult = await RESTWorker("/MooseBox/API/v1.0/peripherals/temperature/timestamps/query",
-                                                  Method.GET,
-                                                  restRequest => { restRequest.AddQueryParameter(ParamSerialNumber, serialNumber); });
+            IRestResponse restResponse = await RESTWorker("/MooseBox/API/v1.0/peripherals/temperature/timestamps/query",
+                                                          Method.GET,
+                                                          restRequest => { restRequest.AddQueryParameter(ParamSerialNumber, serialNumber); });
 
             //Parse resultant data.
-            startTimestamp = jsonResult.StartTimestamp;
-            stopTimestamp = jsonResult.EndTimestmap;
+            try
+            {
+                dynamic jsonResult = JsonConvert.DeserializeObject(restResponse.Content);
 
+                startTimestamp = ExtensionMethods.FromUnixTicks(Convert.ToDouble(jsonResult.StartTimestamp));
+                stopTimestamp = ExtensionMethods.FromUnixTicks(Convert.ToDouble(jsonResult.EndTimestamp));
+            }
+            catch { Debug.Assert(false); }
+            
             return Tuple.Create(startTimestamp, stopTimestamp);
         }
         #endregion

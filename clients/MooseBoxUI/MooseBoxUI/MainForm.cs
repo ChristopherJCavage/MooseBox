@@ -56,8 +56,8 @@ namespace MooseBoxUI
         /// <param name="e">Generic event args.</param>
         private void MainForm_Load(object sender, EventArgs e)
         {
-            //Configure the actual MooseBox endpoint so we can connect via REST APIs.
-            MooseBoxRESTAPIFactory.Instance.Register("http://10.0.1.4:8080");
+            //Configure the actual MooseBox endpoint so we can connect via REST APIs; First Release is a static IP on our home network (local).
+            MooseBoxRESTAPIFactory.Instance.Register("http://10.0.1.42:8080");
 
             //Start the Polling Timer.
             m_statusPollTimer.Start();
@@ -122,14 +122,25 @@ namespace MooseBoxUI
         }
 
         /// <summary>
-        /// 
+        /// UI Handler for Advanced -> Plot Temperature Data.
         /// </summary>
         /// <param name="sender">Instance of object raising event.</param>
         /// <param name="e">Generic event args.</param>
-        private void clearTemperatureDataToolStripMenuItem_Click(object sender, EventArgs e)
+        private void plotTemperatureDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (TemperaturePlotForm temperaturePlotForm = new TemperaturePlotForm())
+                temperaturePlotForm.ShowDialog();
+        }
+
+        /// <summary>
+        /// Attempts to clear all historical data from MooseBox's RedisDB instance.
+        /// </summary>
+        /// <param name="sender">Instance of object raising event.</param>
+        /// <param name="e">Generic event args.</param>
+        private void clearHistoricalDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //Ensure the user really wants to do this!
-            if (DialogResult.Yes != MessageBox.Show("Are you sure you want to delete all historical temperature data?",
+            if (DialogResult.Yes != MessageBox.Show("Are you sure you want to delete all historical data?",
                                                     "Confirm",
                                                     MessageBoxButtons.YesNo,
                                                     MessageBoxIcon.Question,
@@ -140,27 +151,7 @@ namespace MooseBoxUI
             AsyncHelper.RunSync(() => { return TemperatureSensor._59000002A218F928.Clear(); });
             AsyncHelper.RunSync(() => { return TemperatureSensor._F7000002A215B828.Clear(); });
 
-            MessageBox.Show("Data successfully cleared",
-                            "Success",
-                            MessageBoxButtons.OK);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender">Instance of object raising event.</param>
-        /// <param name="e">Generic event args.</param>
-        private void clearFanControlDataToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //Ensure the user really wants to do this!
-            if (DialogResult.Yes != MessageBox.Show("Are you sure you want to delete all historical fan power data?",
-                                                    "Confirm",
-                                                    MessageBoxButtons.YesNo,
-                                                    MessageBoxIcon.Question,
-                                                    MessageBoxDefaultButton.Button2))
-                return;
-
-            //Delete all fan ctrl data.
+            //Delete all fan ctrl data (not currently plotted for Q4 2015).
             AsyncHelper.RunSync(() => { return Fan.Fan1.Clear(); });
             AsyncHelper.RunSync(() => { return Fan.Fan2.Clear(); });
             AsyncHelper.RunSync(() => { return Fan.Fan3.Clear(); });

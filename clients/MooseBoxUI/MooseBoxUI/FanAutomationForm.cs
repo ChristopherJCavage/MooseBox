@@ -241,6 +241,7 @@ namespace MooseBoxUI
             if (found == true)
             {
                 comboBox.SelectedText = temperatureSensor.SerialNumber;
+                comboBox.SelectedItem = temperatureSensor.SerialNumber;
                 comboBox.Enabled = false;
             }
             else
