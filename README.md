@@ -61,7 +61,7 @@ Following are some pictures to showing the MooseBox during different phases:
 **20150930:** Early progress of the wood framework for sausage curing racks:
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/201509_MooseBox.png)
 
-**20151126:** Windows client screenshots on Dell economy laptop for temperature monitoring, fan automation, temperature alarms and manual overrides
+**20151126:** Windows client screenshots on Dell economy laptop for temperature monitoring, fan automation, temperature alarms, fan power on/off manual overrides, and plotting of historical temperature data.
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MainCtrlPanel_RevA.PNG)
 
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/FanAutomationPanel_RevA.png)
@@ -71,6 +71,8 @@ Following are some pictures to showing the MooseBox during different phases:
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/CreateNewTemperatureAlarm.PNG)
 
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/FanManualOverride_RevA.PNG)
+
+![alt tag][(https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/PlotTemperatureData_RevA.png)
 
 **20151126:** Example of MooseBox Temperature Alarm Email
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxTempAlarmEmail_RevA.PNG)
