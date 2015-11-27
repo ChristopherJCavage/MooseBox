@@ -20,7 +20,7 @@ I am an extremely passionate, professional Software Engineer who mainly speciali
 
 MooseBox is architected to have separate daemons with separate responsibilities: N temperature sensors are driven by the temperature daemon, M fans are controlled by the Fan Control daemon, and there is a web service to communicate with the outside world using a REST API. RedisDB is used for both Publish-Subscribe messaging between the processes and for historical time-series data logging (i.e. using the 'Sorted Set' data structure). Each of the temperature sensors are long-polled at 1.1Hz (which is driven by datasheet specifications). Loose coupling between the processes from the beginning was done because we might plan to add more sensors to the MooseBox platform, including but not limited to: humidity sensors and an embedded camera. I wanted to build something we can grow with from Day #1.
 
-MooseBox is about having fun and curing some delicious charcuteries for eating and making wine!!! Because we love our food and alcohol!!! A charcuterie such as soppressata might take multiple months to make; without extremely expensive commercial refrigerators it can only really be done during the winter months in northern climates (e.g. Northeast Pennsylvania). Even then, to make it as delicious as possible, extreme and continuous attention must be paid to keeping the cured meat within a very narrow temperature range; this precision is necessary because the meat is fermented. 
+MooseBox is about having fun and curing some delicious charcuteries for eating and making wine!!! Because we love our food and alcohol!!! A charcuterie such as soppressata might take multiple months to make; without extremely expensive commercial refrigerators it can only really be done during the winter months in northern climates (e.g. Northeast Pennsylvania). Even then, to make it as delicious as possible, extreme and continuous attention must be paid to keeping the cured meat within a very narrow temperature range; this precision is necessary because the meat is fermented.  The wine requires precise temperature controls because our homemade wine is made as organic as possible without the use of sulfites, which will spoil if the wine reaches room temperature during the fermenting process.
 
 A MooseBox with two temperature sensors and three fans costs about $240 by the time all the parts, wires, SD cards and WIFI dongle is acquired. Having written a plethora of code for various $5 microcontrollers using I2C sensors before, I realize I could have made better decisions to keep costs lower. However, doing so would require me to really have an electrical engineer handy and at the time of this writing I was/am a remote employee and do not have such contacts close-by to help!
 
@@ -76,3 +76,20 @@ Following are some pictures to showing the MooseBox during different phases:
 
 **20151126:** Example of MooseBox Temperature Alarm Email
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxTempAlarmEmail_RevA.PNG)
+
+**20151127:** Final MooseBox imagery during construction completion
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxControlModule_RevA.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/DuctFan2_RevA.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/DuctFan_RevA.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/TopMooseBox_RevA.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxInner_RevA.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxBoxes_2_RevA.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxBoxes_1_RevA.png)
+
+![alt tag]()
