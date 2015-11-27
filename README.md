@@ -91,5 +91,3 @@ Following are some pictures to showing the MooseBox during different phases:
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxBoxes_2_RevA.png)
 
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxBoxes_1_RevA.png)
-
-![alt tag]()
