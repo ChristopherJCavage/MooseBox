@@ -100,3 +100,11 @@ Following are some pictures to showing the MooseBox during different phases:
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxBoxes_2_RevA.png)
 
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBoxBoxes_1_RevA.png)
+
+**20151128:** My Wife (Sabrina) and Mother (Barbara) painting the MooseBox to make it "Pretty"
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBox_Painting_3.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBox_Painting_2.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBox_Painting_1.png)
