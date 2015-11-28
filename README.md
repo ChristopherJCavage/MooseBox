@@ -13,6 +13,7 @@ The MooseBox supports all of the following features:
 - K subscribers to M Temperature Sensors for email notifications for Temperature Alarms based on an end-user's chosen min/max thresholds.
 - Accumulation of time-series data for each sensor; aiming to store upwards to 4 months of data for each temperature sensor using RedisDB.
 - Leveraged an old Dell economy laptop of my parent’s lying around to put a simple Windows client on it to configure temperature alarms, monitor fan power states and system status, and configure USB fan automation.
+  - The original plan was to have the first release with a Xamarin C# iPhone client but during the time of writing my wife and I were preparing for a cross-country move from Philadelphia to Seattle and so I chose to just leverage their economy laptop with a Windows client which could be written faster.  Also, we had to spend many hours on the final construction and testing of the actual boxes, ducts, and ensuring everything was properly sealed.
 
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/MooseBoxHighLevelArchitecture.png)
 
