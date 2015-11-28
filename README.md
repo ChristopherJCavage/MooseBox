@@ -6,14 +6,22 @@ MooseBox is a Raspberry PI 2 based platform for regulating cold air using progra
 
 Because we make wine in the fall months and soppressata in the winter months in this region, MooseBox is really our hobby project that we work on once a year, with the first functional release at Thanksgiving of 2015.  We intend to add to it a little bit every year (see bottom for list of planned features).
 
-The MooseBox supports all of the following features:
+The MooseBox Server (i.e. Raspberry Pi 2) supports the following:
 - Support for 1...M Temperature Sensors.
 - Independent automation of N programmable USB Fans based on temperature thresholds with a 1-to-Many relationship of Fans to Temperature Sensors.
   - We currently have the MooseBox regulating temperatures in both the wine box and the soppressata box.
+- Manual user overrides of N programmable USB Fans.
 - K subscribers to M Temperature Sensors for email notifications for Temperature Alarms based on an end-user's chosen min/max thresholds.
 - Accumulation of time-series data for each sensor; aiming to store upwards to 4 months of data for each temperature sensor using RedisDB.
-- Leveraged an old Dell economy laptop of my parent’s lying around to put a simple Windows client on it to configure temperature alarms, monitor fan power states and system status, and configure USB fan automation.
-  - The original plan was to have the first release with a Xamarin C# iPhone client but during the time of writing my wife and I were preparing for a cross-country move from Philadelphia to Seattle and so I chose to just leverage their economy laptop with a Windows client which could be written faster.  Also, we had to spend many hours on the final construction and testing of the actual boxes, ducts, and ensuring everything was properly sealed.
+
+The MooseBox Client (i.e. Dell economy laptop) supports the following:
+- System status panel to easily monitor all power states of fans, temperature and memory status.
+- Configuration of Fan automation using easily identifiable temperature sensors.
+- Registration/Unregistration of a user's email address for MooseBox temperature alarms.
+- Manual Fan override panel.
+- Historical temperature data plots configurable via an end-user's selection of time ranges.
+
+For the MooseBox client, the original plan was to have the first release written with a Xamarin C# iPhone client but during the time of writing my wife and I were preparing for a cross-country move from Philadelphia to Seattle and so I chose instead to just leverage their economy laptop with a Windows client which could be written (much) faster due to our time constratints.  Also, we had to spend many hours on the final construction and testing of the actual boxes, ducts, and ensuring everything was properly sealed.  The next highest software priority of MooseBox is an iPhone client.
 
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/MooseBoxHighLevelArchitecture.png)
 
