@@ -108,3 +108,11 @@ Following are some pictures to showing the MooseBox during different phases:
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBox_Painting_2.png)
 
 ![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/MooseBox_Painting_1.png)
+
+**20151129:** Pictures of the final painted MooseBox and homemade wines.
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/PaintedMooseBox_1.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/PaintedMooseBox_2.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/assets/WineInMooseBox.png)
