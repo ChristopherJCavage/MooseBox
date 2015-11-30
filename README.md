@@ -23,7 +23,9 @@ The MooseBox Client (i.e. Dell economy laptop) supports the following:
 
 For the MooseBox client, the original plan was to have the first release written with a Xamarin C# iPhone client but during the time of writing my wife and I were preparing for a cross-country move from Philadelphia to Seattle and so I chose instead to just leverage their economy laptop with a Windows client which could be written (much) faster due to our time constratints.  Also, we had to spend many hours on the final construction and testing of the actual boxes, ducts, and ensuring everything was properly sealed.  The next highest software priority of MooseBox is an iPhone client.
 
-![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/MooseBoxHighLevelArchitecture.png)
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/MooseBoxSystemOverview.png)
+
+![alt tag](https://github.com/ChristopherJCavage/MooseBox/blob/master/documentation/MooseBoxHighLevelSoftwareArchitecture.png)
 
 I am an extremely passionate, professional Software Engineer who mainly specializes in writing with the C, C++ and C# languages - with enough Python knowledge to be dangerous (e.g. build scripts, etc). MooseBox allows me to have some real fun on a side project and learn a language I don't use in my day-2-day grind: JavaScript via node.js. Even though I'm no JavaScript expert, I am trying to write this project "as if" I was writing a professional software project so I'm hoping to have it clean, well commented and easy to understand. Shoot me an email (cjcavage@gmail.com) if you feel otherwise; I really do try to make everything right!  I love playing around on embedded Linux devices like Raspberry PIs and Beagle Bone Blacks!
 
